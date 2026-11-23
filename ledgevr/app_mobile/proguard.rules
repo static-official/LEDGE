@@ -1,0 +1,10 @@
+# LEDGE Mobile R8 keep rules
+-keep public class com.moonydev.ledgevrmobile.MainActivity { public *; }
+-keep public class com.moonydev.ledgevr.WsBridge { public *; }
+-keepclassmembers class com.moonydev.ledgevr.WsBridge {
+    public static native void nativeOnFrame(byte[], int);
+    public static native void nativeOnClosed(java.lang.String);
+}
+-keep public class com.moonydev.ledgevr.HttpBridge { public *; }
+# LEDGE 1.1 audio bridge
+-keep public class com.moonydev.ledgevr.AudioBridge { public *; }

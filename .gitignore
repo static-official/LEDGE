@@ -1,0 +1,31 @@
+skills/
+node_modules/
+
+# build artifacts
+ledgevr/build/
+ledgevr/build_mobile/
+ledgevr/build_ios/
+ledgevr/**/*.o
+ledgevr/*.apk
+*.idsig
+
+# signing keys stay local (build script regenerates a dev keystore if missing)
+ledgevr/ledgevr.keystore
+
+# sandbox-only dirs
+toolchain/
+download/
+upload/
+scripts/*.log
+scripts/__pycache__/
+scripts/pf_json_test.cpp
+scripts/test_json_debug.cpp
+scripts/photon_test.cpp
+scripts/photon_fixture_test.cpp
+scripts/test_mobile_world_host.cpp
+scripts/pd*.c
+
+# OS junk
+.DS_Store
+.env
+
