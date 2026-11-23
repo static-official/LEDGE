@@ -22,7 +22,9 @@ def rel(path):  # repo-root-relative, posix
 
 # --- file inventory -------------------------------------------------------
 SRC_FILES = [
+    f"{IOS}/native_ios/main_entry.mm",
     f"{IOS}/native_ios/main_ios.mm",
+    f"{IOS}/native_ios/ios_gl.mm",
     f"{IOS}/native_ios/ios_backend.mm",
     f"{IOS}/native_ios/ios_host.mm",
     f"{IOS}/native_ios/AppDelegate.mm",
@@ -33,6 +35,8 @@ SRC_FILES = [
     f"{NATIVE}/playfab.cpp",
     f"{NATIVE}/save.cpp",
     f"{NATIVE}/textures.cpp",
+    f"{IOS}/shim/jnihost_impl.cpp",
+    f"{IOS}/shim/asset_impl.cpp",
     f"{IMGUI}/imgui.cpp",
     f"{IMGUI}/imgui_draw.cpp",
     f"{IMGUI}/imgui_tables.cpp",

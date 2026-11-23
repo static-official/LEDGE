@@ -4,10 +4,11 @@
 #pragma once
 #import <OpenGLES/ES3/gl.h>
 #import <OpenGLES/ES3/glext.h>
+#import <OpenGLES/EAGL.h>
 #import <QuartzCore/QuartzCore.h>
 #import <Foundation/Foundation.h>
 #include <string>
-#include "../ledgevr/native/mathlib.h"
+#include "../../ledgevr/native/mathlib.h"
 
 namespace lv {
 

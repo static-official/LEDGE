@@ -44,6 +44,25 @@ xcodebuild -project ledgevr-ios/LEDGEVR.xcodeproj -scheme LEDGE \
   -configuration Release -destination 'generic/platform=iOS' build
 ```
 
+## Cross-building the IPA from Linux (no Mac needed)
+
+`scripts/build_ios_ipa.sh` cross-compiles the whole app with the NDK's clang
+(target arm64-apple-ios13.0), links with `ld64.lld`, and packages an
+**unsigned, signable IPA** using the iPhoneOS16.5 SDK headers
+(`toolchain-ios/sdks/`, sparse-cloned from theos/sdks):
+
+```bash
+bash scripts/build_ios_ipa.sh     # -> download/LEDGE_unsigned.ipa (~40 MB)
+```
+
+The IPA carries `Payload/LEDGE.app` with literal Info.plist values
+(CFBundleExecutable=LEDGE, version 1.1). It is unsigned: code-sign it with
+Xcode, `codesign`, AltStore, SideStore, Sideloadly, ESign, etc. before install.
+
+iOS-only support files: `shim/` (GLES/EGL/JNI/log shims + JniHost/AAsset
+delegation), `native_ios/ios_gl.mm` (GL helpers the shared renderer expects),
+`native_ios/main_entry.mm` (UIApplicationMain).
+
 ## Notes & limits
 
 - Deploy target is iOS 13.0 (URLSessionWebSocketTask). ES 3.2 shaders need an

@@ -1,18 +1,21 @@
 // LEDGE iOS — platform host implementation (Objective-C++).
 // WebSocket: URLSessionWebSocketTask (iOS 13+). HTTPS: NSURLSession dataTask
 // with a semaphore (playfab.cpp calls this off-thread). Audio: AVAudioPlayer
-// playlist (music/*.m4a) + a 6-voice pool of AVAudioPlayers (sfx/*.m4a).
+// playlist (music/*.m4a) + a 13-voice pool of AVAudioPlayers (sfx/*.m4a).
+//
+// Structure note: ObjC @interface/@implementation must live at global scope,
+// so the ObjC classes come first and call into lv::jni() (declared up top).
 #import "ios_host.h"
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <UIKit/UIKit.h>
-#include "../ledgevr/native/log.h"
+#include "../../ledgevr/native/log.h"
 #include <cstring>
 
 namespace lv {
-
-static IosHost g_host;
-IosHost& jni() { return g_host; }
+class IosHost;
+IosHost& jni();
+}
 
 // ---------------------------------------------------------------------------
 // WebSocket bridge
@@ -25,23 +28,23 @@ IosHost& jni() { return g_host; }
 - (void)URLSession:(NSURLSession*)s webSocketTask:(NSURLSessionWebSocketTask*)t
     didOpenProtocolWithProtocolString:(NSString*)p {
     (void)s; (void)t; (void)p;
-    lv::jni().ready_ = true;
+    lv::ios().ready_ = true;
     LOGI("iOS ws opened");
 }
 - (void)URLSession:(NSURLSession*)s webSocketTask:(NSURLSessionWebSocketTask*)t
     didCloseWithCode:(NSURLSessionWebSocketCloseCode)code reason:(NSData*)reason {
     (void)t; (void)reason;
-    std::lock_guard<std::mutex> lk(lv::jni().queue_.mu);
-    lv::jni().queue_.closed = true;
-    lv::jni().queue_.closeReason = "code " + std::to_string((int)code);
+    std::lock_guard<std::mutex> lk(lv::ios().queue_.mu);
+    lv::ios().queue_.closed = true;
+    lv::ios().queue_.closeReason = "code " + std::to_string((int)code);
     LOGI("iOS ws closed %d", (int)code);
 }
 - (void)URLSession:(NSURLSession*)s task:(NSURLSessionTask*)t
     didCompleteWithError:(NSError*)err {
     (void)s; (void)t;
-    std::lock_guard<std::mutex> lk(lv::jni().queue_.mu);
-    lv::jni().queue_.closed = true;
-    lv::jni().queue_.closeReason = err.localizedDescription ? std::string(err.localizedDescription.UTF8String) : "error";
+    std::lock_guard<std::mutex> lk(lv::ios().queue_.mu);
+    lv::ios().queue_.closed = true;
+    lv::ios().queue_.closeReason = err.localizedDescription ? std::string(err.localizedDescription.UTF8String) : "error";
     if (err) LOGE("iOS ws error: %s", err.localizedDescription.UTF8String);
 }
 @end
@@ -52,130 +55,24 @@ static void wsReceiveLoop(BridgeWS* ws) {
     [ws.task receiveMessageWithCompletionHandler:
         ^(NSURLSessionWebSocketMessage* msg, NSError* err) {
             if (err) {
-                std::lock_guard<std::mutex> lk(lv::jni().queue_.mu);
-                lv::jni().queue_.closed = true;
+                std::lock_guard<std::mutex> lk(lv::ios().queue_.mu);
+                lv::ios().queue_.closed = true;
                 return;
             }
             if (msg.data) {
                 NSData* d = msg.data;
                 std::vector<uint8_t> bytes((const uint8_t*)d.bytes,
                                            (const uint8_t*)d.bytes + d.length);
-                std::lock_guard<std::mutex> lk(lv::jni().queue_.mu);
-                if (lv::jni().queue_.frames.size() < 256)
-                    lv::jni().queue_.frames.push_back(std::move(bytes));
+                std::lock_guard<std::mutex> lk(lv::ios().queue_.mu);
+                if (lv::ios().queue_.frames.size() < 256)
+                    lv::ios().queue_.frames.push_back(std::move(bytes));
             }
             if (BridgeWS* strong = weakWs) wsReceiveLoop(strong);
         }];
 }
 
-void IosHost::init() {
-    // playback category so music/SFX mix into the game
-    try {
-        NSError* err = nil;
-        [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback
-                                         mode:AVAudioSessionModeGameChat
-                                      options:0 error:&err];
-        [[AVAudioSession sharedInstance] setActive:YES error:&err];
-    } catch (...) {}
-    audioInit();
-    ready_ = true;
-    LOGI("iOS host ready");
-}
-
-void IosHost::shutdown() {
-    wsClose();
-}
-
-bool IosHost::wsConnect(const std::string& url) {
-    wsClose();
-    BridgeWS* ws = [BridgeWS new];
-    ws.session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]
-                                           delegate:ws delegateQueue:nil];
-    NSURL* u = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
-    if (!u) return false;
-    ws.task = [ws.session webSocketTaskWithURL:u];
-    [ws.task resume];
-    ws_ = (__bridge_retained void*)ws;    // host owns it
-    {
-        std::lock_guard<std::mutex> lk(queue_.mu);
-        queue_.frames.clear();
-        queue_.closed = false;
-    }
-    wsReceiveLoop(ws);
-    return true;
-}
-
-void IosHost::wsSend(const std::vector<uint8_t>& data) {
-    if (!ws_ || data.empty()) return;
-    BridgeWS* ws = (__bridge BridgeWS*)ws_;
-    if (!ws.task) return;
-    NSData* d = [NSData dataWithBytes:data.data() length:data.size()];
-    NSURLSessionWebSocketMessage* m = [[NSURLSessionWebSocketMessage alloc] initWithData:d];
-    [ws.task sendMessage:m completionHandler:^(NSError* err) {
-        if (err) LOGE("iOS ws send failed: %s", err.localizedDescription.UTF8String);
-    }];
-}
-
-void IosHost::wsClose() {
-    if (!ws_) return;
-    BridgeWS* ws = (__bridge_transfer BridgeWS*)ws_;
-    ws_ = nullptr;
-    [ws.task closeWithCode:NSURLSessionWebSocketCloseCodeGoingAway reason:nil];
-    [ws.session invalidateAndCancel];
-    {
-        std::lock_guard<std::mutex> lk(queue_.mu);
-        queue_.closed = true;
-    }
-}
-
-bool IosHost::wsRecv(std::vector<uint8_t>& out) {
-    std::lock_guard<std::mutex> lk(queue_.mu);
-    if (queue_.frames.empty()) return false;
-    out = std::move(queue_.frames.front());
-    queue_.frames.pop_front();
-    return true;
-}
-
-std::string IosHost::httpPost(const std::string& url, const std::string& body,
-                              const std::string& headers, int& httpCode) {
-    httpCode = 0;
-    NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL:
-        [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]]];
-    if (!req) return "bad url";
-    req.HTTPMethod = @"POST";
-    req.HTTPBody = [NSData dataWithBytes:body.data() length:body.size()];
-    size_t pos = 0;
-    while (pos < headers.size()) {
-        size_t e = headers.find('\n', pos);
-        std::string line = headers.substr(pos, e == std::string::npos ? std::string::npos : e - pos);
-        size_t c = line.find(':');
-        if (c != std::string::npos && c > 0)
-            [req setValue:[NSString stringWithUTF8String:line.substr(c + 1).c_str()]
-              forHTTPHeaderField:[NSString stringWithUTF8String:line.substr(0, c).c_str()]];
-        if (e == std::string::npos) break;
-        pos = e + 1;
-    }
-    __block NSData* out = nil;
-    __block NSString* errText = nil;
-    dispatch_semaphore_t sem = dispatch_semaphore_create(0);
-    NSURLSessionDataTask* task = [[NSURLSession sharedSession] dataTaskWithRequest:req
-        completionHandler:^(NSData* data, NSURLResponse* resp, NSError* err) {
-            if (err) errText = err.localizedDescription;
-            else {
-                NSHTTPURLResponse* http = (NSHTTPURLResponse*)resp;
-                httpCode = (int)http.statusCode;
-                out = data;
-            }
-            dispatch_semaphore_signal(sem);
-        }];
-    [task resume];
-    dispatch_semaphore_wait(sem, dispatch_time(DISPATCH_TIME_NOW, 20LL * NSEC_PER_SEC));
-    if (out) return std::string((const char*)out.bytes, out.length);
-    return errText ? std::string(errText.UTF8String) : "transport failure";
-}
-
 // ---------------------------------------------------------------------------
-// audio: AVAudioPlayer playlist + SFX pool
+// audio: AVAudioPlayer playlist + SFX pool (NSNull marks missing files)
 // ---------------------------------------------------------------------------
 static const char* kMusicFiles[7] = {
     "menu_candy_skies", "build_ledge_loops", "game_pastel_rush",
@@ -183,11 +80,11 @@ static const char* kMusicFiles[7] = {
 };
 static const char* kSfxFiles[13] = {
     "grab", "release", "land", "goal", "bounce", "place", "delete",
-    "click", "open", "success", "whoosh", "pop", "emote"
+    "click", "open", "success", "whoosh", "pop", "emote",
 };
 
 @interface AudioIOS : NSObject <AVAudioPlayerDelegate>
-@property (strong) NSMutableArray<AVAudioPlayer*>* pool;   // 13 sfx players
+@property (strong) NSMutableArray* pool;      // AVAudioPlayer or NSNull per sfx
 @property (strong) AVAudioPlayer* music;
 @property (assign) int track;
 @property (assign) float musicVol, sfxVol;
@@ -242,10 +139,8 @@ static AudioIOS* gAudio = nil;
     if (!self.music) return;
     self.music.numberOfLoops = 0;
     self.music.volume = self.musicVol;
-    [self.music play];
-    __weak AudioIOS* wself = self;
     self.music.delegate = self;
-    (void)wself;
+    [self.music play];
 }
 - (void)audioPlayerDidFinishPlaying:(AVAudioPlayer*)player successfully:(BOOL)flag {
     (void)player; (void)flag;
@@ -262,6 +157,117 @@ static AudioIOS* gAudio = nil;
 }
 @end
 
+namespace lv {
+
+static IosHost g_host;
+IosHost& ios() { return g_host; }
+
+void IosHost::init() {
+    // playback category so music/SFX mix into the game
+    NSError* err = nil;
+    [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback
+                                            mode:AVAudioSessionModeGameChat
+                                         options:0
+                                           error:&err];
+    [[AVAudioSession sharedInstance] setActive:YES error:&err];
+    audioInit();
+    ready_ = true;
+    LOGI("iOS host ready");
+}
+
+void IosHost::shutdown() {
+    wsClose();
+}
+
+bool IosHost::wsConnect(const std::string& url) {
+    wsClose();
+    BridgeWS* ws = [BridgeWS new];
+    ws.session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration]
+                                               delegate:ws
+                                          delegateQueue:nil];
+    NSURL* u = [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]];
+    if (!u) return false;
+    ws.task = [ws.session webSocketTaskWithURL:u];
+    [ws.task resume];
+    ws_ = (__bridge_retained void*)ws;    // host owns it
+    {
+        std::lock_guard<std::mutex> lk(queue_.mu);
+        queue_.frames.clear();
+        queue_.closed = false;
+    }
+    wsReceiveLoop(ws);
+    return true;
+}
+
+void IosHost::wsSend(const std::vector<uint8_t>& data) {
+    if (!ws_ || data.empty()) return;
+    BridgeWS* ws = (__bridge BridgeWS*)ws_;
+    if (!ws.task) return;
+    NSData* d = [NSData dataWithBytes:data.data() length:data.size()];
+    NSURLSessionWebSocketMessage* m = [[NSURLSessionWebSocketMessage alloc] initWithData:d];
+    [ws.task sendMessage:m completionHandler:^(NSError* err) {
+        if (err) LOGE("iOS ws send failed: %s", err.localizedDescription.UTF8String);
+    }];
+}
+
+void IosHost::wsClose() {
+    if (!ws_) return;
+    BridgeWS* ws = (__bridge_transfer BridgeWS*)ws_;
+    ws_ = nullptr;
+    [ws.task cancelWithCloseCode:NSURLSessionWebSocketCloseCodeGoingAway reason:nil];
+    [ws.session invalidateAndCancel];
+    {
+        std::lock_guard<std::mutex> lk(queue_.mu);
+        queue_.closed = true;
+    }
+}
+
+bool IosHost::wsRecv(std::vector<uint8_t>& out) {
+    std::lock_guard<std::mutex> lk(queue_.mu);
+    if (queue_.frames.empty()) return false;
+    out = std::move(queue_.frames.front());
+    queue_.frames.pop_front();
+    return true;
+}
+
+std::string IosHost::httpPost(const std::string& url, const std::string& body,
+                              const std::string& headers, int& httpCode) {
+    httpCode = 0;
+    NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL:
+        [NSURL URLWithString:[NSString stringWithUTF8String:url.c_str()]]];
+    if (!req) return "bad url";
+    req.HTTPMethod = @"POST";
+    req.HTTPBody = [NSData dataWithBytes:body.data() length:body.size()];
+    size_t pos = 0;
+    while (pos < headers.size()) {
+        size_t e = headers.find('\n', pos);
+        std::string line = headers.substr(pos, e == std::string::npos ? std::string::npos : e - pos);
+        size_t c = line.find(':');
+        if (c != std::string::npos && c > 0)
+            [req setValue:[NSString stringWithUTF8String:line.substr(c + 1).c_str()]
+        forHTTPHeaderField:[NSString stringWithUTF8String:line.substr(0, c).c_str()]];
+        if (e == std::string::npos) break;
+        pos = e + 1;
+    }
+    __block NSData* out = nil;
+    __block NSString* errText = nil;
+    dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+    NSURLSessionDataTask* task = [[NSURLSession sharedSession] dataTaskWithRequest:req
+        completionHandler:^(NSData* data, NSURLResponse* resp, NSError* err) {
+            if (err) errText = err.localizedDescription;
+            else {
+                NSHTTPURLResponse* http = (NSHTTPURLResponse*)resp;
+                httpCode = (int)http.statusCode;
+                out = data;
+            }
+            dispatch_semaphore_signal(sem);
+        }];
+    [task resume];
+    dispatch_semaphore_wait(sem, dispatch_time(DISPATCH_TIME_NOW, 20LL * NSEC_PER_SEC));
+    if (out) return std::string((const char*)out.bytes, out.length);
+    return errText ? std::string(errText.UTF8String) : "transport failure";
+}
+
 void IosHost::audioInit() {
     if (!gAudio) gAudio = [AudioIOS new];
 }
@@ -273,5 +279,25 @@ void IosHost::sfx(int idx) { if (gAudio) [gAudio playSfx:idx]; }
 void IosHost::musicVol(float v) { if (gAudio) { gAudio.musicVol = v; if (gAudio.music) gAudio.music.volume = v; } }
 void IosHost::sfxVol(float v) { if (gAudio) gAudio.sfxVol = v; }
 int IosHost::musicTrack() { return gAudio ? gAudio.track : 0; }
+
+// ---- free-function bridge consumed by shim/jnihost_impl.cpp ----
+namespace ioshim {
+bool wsConnect(const std::string& url) { return g_host.wsConnect(url); }
+void wsSend(const std::vector<uint8_t>& d) { g_host.wsSend(d); }
+void wsClose() { g_host.wsClose(); }
+bool wsRecv(std::vector<uint8_t>& out) { return g_host.wsRecv(out); }
+std::string httpPost(const std::string& url, const std::string& body,
+                     const std::string& headers, int& code) {
+    return g_host.httpPost(url, body, headers, code);
+}
+void audioInit() { g_host.audioInit(); }
+void musicPlay(int i) { g_host.musicPlay(i); }
+void musicNext() { g_host.musicNext(); }
+void musicStop() { g_host.musicStop(); }
+void sfx(int i) { g_host.sfx(i); }
+void musicVol(float v) { g_host.musicVol(v); }
+void sfxVol(float v) { g_host.sfxVol(v); }
+int musicTrack() { return g_host.musicTrack(); }
+} // namespace ioshim
 
 } // namespace lv

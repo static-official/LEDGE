@@ -2,8 +2,6 @@
 // menu, editor, multiplayer. Port of main_mobile.cpp: same world/renderer/
 // photon/playfab stack, touch camera + HUD, audio & network via ios_host.
 #include <imgui.h>
-#include <EGL/egl.h>
-#include <GLES3/gl32.h>
 #include <cstring>
 #include <algorithm>
 #include <cmath>
@@ -72,7 +70,7 @@ static void pushStatus(const std::string& s) { G.status = s; }
 static void startEmote(uint8_t e) {
     G.emote = e;
     G.emoteT = 0;
-    jni().sfx(SFX_EMOTE);
+    ios().sfx(SFX_EMOTE);
     vec3 c = kBodyColors[G.save.settings.bodyColor % kBodyColorCount];
     G.ps.spawn(ParticleSystem::FX_EMOTE, G.W.bodyFeet(), vec3(c.x, c.y, c.z));
     if (G.pc.status == PH_InRoom)
@@ -229,7 +227,7 @@ static void drawMenu() {
     const char* tabs[] = { "Home", "Lobbies", "People", "Levels", "Editor", "Settings", "Cosmetics", "Account" };
     for (int i = 0; i < 8; i++) {
         if (ImGui::Button(tabs[i], ImVec2(ImGui::GetContentRegionAvail().x / 4.0f - 6, 64))) {
-            if (G.menuTab != i) jni().sfx(SFX_CLICK);   // 1.1 UI click
+            if (G.menuTab != i) ios().sfx(SFX_CLICK);   // 1.1 UI click
             G.menuTab = i;
         }
         if (i % 4 != 3) ImGui::SameLine();
@@ -252,9 +250,9 @@ static void drawMenu() {
         ImGui::SameLine();
         if (ImGui::Button("Taunt##vt", ImVec2(150, 50))) startEmote(EM_TAUNT);
         ImGui::Separator();
-        ImGui::Text("Music: %s", musicTitle(jni().musicTrack()));
+        ImGui::Text("Music: %s", musicTitle(ios().musicTrack()));
         ImGui::SameLine();
-        if (ImGui::Button("Next", ImVec2(120, 44))) jni().musicNext();        if (ImGui::Button(G.pc.status == PH_InRoom ? "In lobby room" : "Quick join LEDGE-Public",
+        if (ImGui::Button("Next", ImVec2(120, 44))) ios().musicNext();        if (ImGui::Button(G.pc.status == PH_InRoom ? "In lobby room" : "Quick join LEDGE-Public",
                           ImVec2(340, 70))) {
             if (G.pc.status == PH_InRoom) G.pc.leaveRoom();
             else G.pc.joinRoom("LEDGE-Public", 16);
@@ -417,9 +415,9 @@ static void drawMenu() {
         ImGui::Checkbox("Voice chat (open mic)", &G.save.settings.voiceEnabled);
         ImGui::Separator();
         ImGui::SliderFloat("Music volume", &G.mvol, 0.0f, 1.0f, "%.1f");
-        if (ImGui::IsItemEdited()) jni().musicVol(G.mvol);
+        if (ImGui::IsItemEdited()) ios().musicVol(G.mvol);
         ImGui::SliderFloat("SFX volume", &G.svol, 0.0f, 1.0f, "%.1f");
-        if (ImGui::IsItemEdited()) jni().sfxVol(G.svol);
+        if (ImGui::IsItemEdited()) ios().sfxVol(G.svol);
         ImGui::Text("Photon region:");
         static const char* regions[] = { "eu", "us", "asia", "jp", "au", "kr", "ca", "sa", "in", "ru" };
         for (int i = 0; i < 10; i++) {
@@ -547,10 +545,10 @@ static void photonInit() {
     G.pc.appVersion = "1.0";
     G.pc.nick = mobileName();
     G.pc.region = G.save.settings.region;
-    G.pc.transportConnect = [](const std::string& url) { return jni().wsConnect(url); };
-    G.pc.transportSend = [](const std::vector<uint8_t>& d) { jni().wsSend(d); };
-    G.pc.transportClose = [] { jni().wsClose(); };
-    G.pc.transportRecv = [](std::vector<uint8_t>& out) { jni().wsRecv(out); };
+    G.pc.transportConnect = [](const std::string& url) { return ios().wsConnect(url); };
+    G.pc.transportSend = [](const std::vector<uint8_t>& d) { ios().wsSend(d); };
+    G.pc.transportClose = [] { ios().wsClose(); };
+    G.pc.transportRecv = [](std::vector<uint8_t>& out) { ios().wsRecv(out); };
     G.pc.onStatus = [](int s, const std::string& d) {
         pushStatus(std::string(photonStatusName(s)) + (d.empty() ? "" : (": " + d)));
     };
@@ -805,7 +803,7 @@ static void drawHudBox(const mat4& model, const vec4& color) {
 }
 
 static void drawHud() {
-    TouchBackend& tb = G.tb;
+    IosBackend& tb = G.tb;
     if (!tb.hudVisible || G.menuOpen) return;
     float s = (float)tb.h / 720.0f;
     if (s < 0.75f) s = 0.75f;
@@ -817,13 +815,13 @@ static void drawHud() {
     G.R.setViewProj(ortho.m, ident.m);
     G.R.wtext.begin();
 
-    auto box = [&](const TouchBackend::Rect& r, const vec4& c, bool pressed) {
+    auto box = [&](const IosBackend::Rect& r, const vec4& c, bool pressed) {
         vec4 col = pressed ? vec4(c.x * 1.35f, c.y * 1.35f, c.z * 1.35f, 0.95f) : c;
         float cy = h - (r.y + r.h * 0.5f);
         drawHudBox(mat4::translate(vec3(r.x + r.w * 0.5f, cy, 0)) *
                    mat4::scale(vec3(r.w * 0.5f, r.h * 0.5f, 0.4f)), col);
     };
-    auto label = [&](const char* txt, const TouchBackend::Rect& r, float hpx, const vec4& c) {
+    auto label = [&](const char* txt, const IosBackend::Rect& r, float hpx, const vec4& c) {
         float cy = h - (r.y + r.h * 0.5f) - hpx * 0.36f;
         G.R.wtext.addText(txt, vec3(r.x + r.w * 0.5f - (float)strlen(txt) * hpx * 0.32f, cy, 0.6f),
                           hpx, c, false);
@@ -864,7 +862,7 @@ static void drawHud() {
     }
 
     // joystick visual (left pad)
-    if (tb.role[0] == TouchBackend::PR_JOY || len(tb.stickL) > 0.01f) {
+    if (tb.role[0] == IosBackend::PR_JOY || len(tb.stickL) > 0.01f) {
         float jx = tb.joyOriginX, jy = h - tb.joyOriginY;
         float r = h * 0.14f; if (r < 60) r = 60;
         vec4 ring(0.85f, 0.88f, 0.95f, 0.35f);
@@ -970,7 +968,7 @@ static bool mainLoop(bool surfaceReady) {
     G.W.update(in, G.save.settings, G.ed);
     if (G.W.onGroundFlag() && G.wasAir && G.prevVelY < -4.0f) {
         G.squash = std::max(0.68f, 1.0f + G.prevVelY * 0.032f);   // land squash
-        jni().sfx(SFX_LAND);
+        ios().sfx(SFX_LAND);
     }
     G.squash += (1.0f - G.squash) * std::min(1.0f, dt * 9.0f);
 
@@ -1083,18 +1081,18 @@ extern "C" {
 void iosMain_init(const char* docsDir, const char* bundleDir) {
     LOGI("LEDGE iOS shell starting");
 
-    jni().init();
+    ios().init();
     G.dataDir = docsDir ? docsDir : "/tmp";
     G.bundleDir = bundleDir ? bundleDir : "";
     G.store.init(G.dataDir);
     G.store.load(G.save);
 
     // 1.1: world audio hooks → ios_host audio + background music
-    G.W.onSound = [](int s) { jni().sfx(s); };
+    G.W.onSound = [](int s) { ios().sfx(s); };
     G.W.onFx = [](int fx, const vec3& pos, const vec3& color) {
         G.ps.spawn(fx, pos, color);
     };
-    jni().musicPlay(0);   // Candy Skies from the start
+    ios().musicPlay(0);   // Candy Skies from the start
 
     // ImGui context early: photon join callbacks stamp ImGui::GetTime()
     ImGui::CreateContext();
@@ -1113,16 +1111,16 @@ void iosMain_touch(int phase, uintptr_t id, float x, float y) {
 }
 
 void iosMain_resize(void* caeagllayer, int w, int h) {
-    if (!G.tb.init((CAEAGLLayer*)caeagllayer, w, h))
+    if (!G.tb.init((__bridge CAEAGLLayer*)caeagllayer, w, h))
         LOGE("iOS: EAGL init failed");
 }
 
 void iosMain_pause() {
-    jni().musicStop();
+    ios().musicStop();
 }
 
 void iosMain_resume() {
-    jni().musicPlay(jni().musicTrack());
+    ios().musicPlay(ios().musicTrack());
 }
 
 // returns true when the app should keep running (CADisplayLink target)
@@ -1132,7 +1130,7 @@ bool iosMain_frame(bool surfaceReady) {
 
 void iosMain_shutdown() {
     G.tb.shutdown();
-    jni().shutdown();
+    ios().shutdown();
     LOGI("LEDGE iOS shell exit");
 }
 

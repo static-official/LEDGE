@@ -1,6 +1,7 @@
 // LEDGE iOS — game view controller: owns the CAEAGLLayer, drives the native
 // game loop with CADisplayLink, forwards UITouches into ios_backend.
 #import "GameViewController.h"
+#import <QuartzCore/QuartzCore.h>
 #include "ios_main.h"
 
 // ---------------------------------------------------------------------------
@@ -100,7 +101,7 @@
 // touch forwarding: map UITouch* -> stable small id (0..7)
 // ---------------------------------------------------------------------------
 - (int)idForTouch:(UITouch*)t {
-    NSValue* key = [NSValue valueWithPointer:t];
+    NSValue* key = [NSValue valueWithPointer:(__bridge const void*)t];
     NSNumber* existing = self.touchIds[key];
     if (existing) return existing.intValue;
     if (self.touchIds.count >= 8) return 7;
@@ -136,7 +137,7 @@
         p.x *= self.gameView.contentScaleFactor;
         p.y *= self.gameView.contentScaleFactor;
         iosMain_touch(2, (uintptr_t)[self idForTouch:t], p.x, p.y);
-        [self.touchIds removeObjectForKey:[NSValue valueWithPointer:t]];
+        [self.touchIds removeObjectForKey:[NSValue valueWithPointer:(__bridge const void*)t]];
     }
 }
 

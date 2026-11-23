@@ -49,7 +49,7 @@ public:
     bool ready_ = false;
 };
 
-IosHost& jni();
+IosHost& ios();
 
 // music titles mirrored for the menu (order = playlist order)
 inline const char* musicTitle(int i) {

@@ -2,7 +2,8 @@
 // Behavior mirrors native/touch_backend.cpp (Android EGL) so the game loop
 // code in main_ios.cpp is a near copy of main_mobile.cpp.
 #include "ios_backend.h"
-#include "../ledgevr/native/log.h"
+#import <UIKit/UIKit.h>
+#include "../../ledgevr/native/log.h"
 #include <cmath>
 #include <cstring>
 #include <algorithm>

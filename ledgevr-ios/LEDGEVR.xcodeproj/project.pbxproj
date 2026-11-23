@@ -4,410 +4,442 @@
 	objectVersion = 56;
 	classes = {}
 	objects = {
-		4C7E5C8AC3F6414AA61C7831 = {
+		F70B8AEB2C9D4AA89456C2E2 = {
+			isa = PBXFileReference;
+			fileEncoding = 4;
+			lastKnownFileType = sourcecode.cpp.objcpp;
+			path = native_ios/main_entry.mm;
+		};
+		705FC230A28A4DB881D0EB45 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.objcpp;
 			path = native_ios/main_ios.mm;
 		};
-		84656D0B61C74EB1AE32D4DC = {
+		9A7422E4786B41B18AD45B9D = {
+			isa = PBXFileReference;
+			fileEncoding = 4;
+			lastKnownFileType = sourcecode.cpp.objcpp;
+			path = native_ios/ios_gl.mm;
+		};
+		D9A87869230146BE9920DA4D = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.objcpp;
 			path = native_ios/ios_backend.mm;
 		};
-		C52C704D856D47088F49889C = {
+		654BA53CC9DB4C9C93C50CBF = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.objcpp;
 			path = native_ios/ios_host.mm;
 		};
-		9127D6E7BE7C4F0392118C47 = {
+		5082C5B0C7124C6090330320 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.objcpp;
 			path = native_ios/AppDelegate.mm;
 		};
-		578EBF9654AE4B6781D17ED5 = {
+		DDCA3D1C422F4507ABEB1CD0 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.objcpp;
 			path = native_ios/GameViewController.mm;
 		};
-		402EF23288494018A685F7C2 = {
+		01C8D43D61F2439D85DFD403 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			path = "../ledgevr/native/renderer.cpp";
 		};
-		949A7F85A36E4B918ED40F72 = {
+		FE435140D74C458CA07CE544 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			path = "../ledgevr/native/world.cpp";
 		};
-		B49CE4A411444ACABC4D7942 = {
+		577B0975ECFF4D8B859EBBD9 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			path = "../ledgevr/native/photon.cpp";
 		};
-		76D56475EE7D4101A9056C1D = {
+		57311A43B2804537A9293C3F = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			path = "../ledgevr/native/playfab.cpp";
 		};
-		F01C8682A26344B89F65A1AD = {
+		6F42FAB14BD94916A2A71A2B = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			path = "../ledgevr/native/save.cpp";
 		};
-		8A7BAFA931074C7DAA986321 = {
+		82CA65E63A7F4F0985A567FC = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			path = "../ledgevr/native/textures.cpp";
 		};
-		ECD04BDF95A0408A9EBD3623 = {
+		4CC606C83C194694A8A42615 = {
+			isa = PBXFileReference;
+			fileEncoding = 4;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			path = shim/jnihost_impl.cpp;
+		};
+		16443A81FA0544A888801403 = {
+			isa = PBXFileReference;
+			fileEncoding = 4;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			path = shim/asset_impl.cpp;
+		};
+		41E01D75CEFC4818BA701659 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			path = "../ledgevr/vendor/imgui/imgui.cpp";
 		};
-		1AC2EEF05AEE4A46862BFF79 = {
+		68D237421B8B4DC5AFB437EA = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			path = "../ledgevr/vendor/imgui/imgui_draw.cpp";
 		};
-		CA61BFB4F772475295AF35DE = {
+		4D396F6B83304ED5A7DBC95A = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			path = "../ledgevr/vendor/imgui/imgui_tables.cpp";
 		};
-		B60DBE4911064F3DB41A99E2 = {
+		363A9C9E20F744D185F38703 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.cpp.cpp;
 			path = "../ledgevr/vendor/imgui/imgui_widgets.cpp";
 		};
-		55F2BC577AF74E06BC32313E = {
+		A6F7086821614CBEB85BD91E = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = native_ios/ios_backend.h;
 		};
-		5D6923C50E594C0BBEA91C97 = {
+		12F14C9459BF45DA93A6A3B9 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = native_ios/ios_host.h;
 		};
-		95553725C7614BBC9BCB4AED = {
+		7D2E124CCF6945238DD66D79 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = native_ios/ios_main.h;
 		};
-		CE8713508F7A412EB11985D2 = {
+		AF4EE2AFA9CD4C5D98FF5080 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = native_ios/AppDelegate.h;
 		};
-		9507AC1A2EBF4F818BF64515 = {
+		43FCE797197C41AE8FD4814A = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = native_ios/GameViewController.h;
 		};
-		FECCBAC75BDE4C3EBDA2B916 = {
+		BBFD4653E0824D85B1B9E91D = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = "../ledgevr/native/mathlib.h";
 		};
-		BF4494554F164F70B8AC03CC = {
+		BA62587FD16D4DCB9A9D5456 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = "../ledgevr/native/world.h";
 		};
-		FA3B4ECCC29046F58965AA4F = {
+		B5CBEDC6FE72432E9C65A91C = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = "../ledgevr/native/renderer.h";
 		};
-		5C147B5D51DE4E748D8E0C51 = {
+		E8EF8345D2B54D40A46C1BF6 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = "../ledgevr/native/photon.h";
 		};
-		6EAD308A52564504A730EA38 = {
+		4DC04BA3C8A84949A1D46919 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = "../ledgevr/native/playfab.h";
 		};
-		A897E688530A4581B0F33E1C = {
+		BF0C3EB655044B118A7E868F = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = "../ledgevr/native/save.h";
 		};
-		2063E7228EC742488D01B284 = {
+		11D745BAB4434E97ADDFE5F8 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = "../ledgevr/native/anim.h";
 		};
-		66043727369D4F7D8F4167CC = {
+		D346B58C85BC4F6B97F9D0EF = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = "../ledgevr/native/textures.h";
 		};
-		5EC68E1C234E454C96CAE0ED = {
+		2743C3F5282E4C12B721396F = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = "../ledgevr/native/assets.h";
 		};
-		5714FF590B0D4FD4A2510D44 = {
+		E1E74B02BC274E44ADE18517 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = "../ledgevr/native/log.h";
 		};
-		5FCDB11C7D7F41818457D2E2 = {
+		0269479E659A4677848E3125 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = "../ledgevr/vendor/imgui/imgui.h";
 		};
-		38A21FF7D6CF458B939F030D = {
+		6B9E8F74C90C44AE8B301317 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = "../ledgevr/vendor/imgui/imconfig.h";
 		};
-		E20577949AAB4F42B1043AA5 = {
+		0542BA7F5CF44F1E90A49E66 = {
 			isa = PBXFileReference;
 			fileEncoding = 4;
 			lastKnownFileType = sourcecode.c.h;
 			path = "../ledgevr/vendor/imgui/imgui_internal.h";
 		};
-		DDD2F311F41E4313927C79EE = {
+		1A8CEF0062F04F2CB80CCFE3 = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = UIKit.framework;
 			path = System/Library/Frameworks/UIKit.framework;
 			sourceTree = SDKROOT;
 		};
-		45BA7693A6F2425F9A91B4B1 = {
+		D9D53E2316504D27A7ED43E9 = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = Foundation.framework;
 			path = System/Library/Frameworks/Foundation.framework;
 			sourceTree = SDKROOT;
 		};
-		29B2FFD5FCF9462DBBBA3EF7 = {
+		D3579864D118404BBA7413FB = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = OpenGLES.framework;
 			path = System/Library/Frameworks/OpenGLES.framework;
 			sourceTree = SDKROOT;
 		};
-		DAA0CD6D0A924FB5AAD14C93 = {
+		23B693AAC4714A40917A903D = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = QuartzCore.framework;
 			path = System/Library/Frameworks/QuartzCore.framework;
 			sourceTree = SDKROOT;
 		};
-		F619BC18E69545B788137AD0 = {
+		D508FC1387D647CD8B8801BE = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = AVFoundation.framework;
 			path = System/Library/Frameworks/AVFoundation.framework;
 			sourceTree = SDKROOT;
 		};
-		B22BBE3629674A9BA5DF3937 = {
+		FC9B74BA5DFD4783A1603D54 = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = CoreGraphics.framework;
 			path = System/Library/Frameworks/CoreGraphics.framework;
 			sourceTree = SDKROOT;
 		};
-		E7B5E768FA3A48CABA552875 = {
+		7514628B68184F31973F2C47 = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
 			name = GLKit.framework;
 			path = System/Library/Frameworks/GLKit.framework;
 			sourceTree = SDKROOT;
 		};
-		E7C470D8EF74474091D4115F = {
+		A883384165264988A52F3AC8 = {
 			isa = PBXFileReference;
 			lastKnownFileType = folder;
 			path = Resources/music;
 		};
-		6807460945B545C6A6D2B4E9 = {
+		D219CC8BC3F1494C8EC1A79D = {
 			isa = PBXFileReference;
 			lastKnownFileType = folder;
 			path = Resources/sfx;
 		};
-		E2CA7A323E6646CC9AFA7115 = {
+		AB56DA3BD15C41F1BE594F02 = {
 			isa = PBXFileReference;
 			lastKnownFileType = folder;
 			path = Resources/tex;
 		};
-		4CF1D2E43C0F4947B3992921 = {
+		66A0FE8549EE43E09724898A = {
 			isa = PBXFileReference;
 			lastKnownFileType = text.plist.xml;
 			path = native_ios/Info.plist;
 		};
-		961A05810A784BB78F8B8400 = {
+		E49EFE3CF9554A0DBD693949 = {
 			isa = PBXFileReference;
 			explicitFileType = wrapper.application;
 			includeInIndex = 0;
 			path = LEDGE.app;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		0E98F969E06A458F9212B001 = {
+		1DEB4CD5D71F40408EB2A1AD = {
 			isa = PBXGroup;
 			children = (
-				F54F9483A209495D96256E63,
-				6BE6B4B9876044DCB871C326,
-				225C947238B740AF8E7F03A3,
-				E8D47E06EEB44643B1A5E4B8,
-				CF75DCA991FF42E5A7817255,
-				45DF37427F224149A00B8C75,
-				C19DF2D275A24252A3BDAA0B,
-				F2E7EA16545540B78EE9C08B,
-				DB25F21009454A549E8EFA45,
-				00D9677A283249C68D52D9D8,
-				27393F4DB9424CAD9E9140A3,
-				8951AD8735274E6AAD258030,
-				51E529FFC30A4D149E7D615C,
-				A45A794464AF4E81B680755B,
-				A8A10A953F824EE0B9AEF1C2,
-				55F2BC577AF74E06BC32313E,
-				5D6923C50E594C0BBEA91C97,
-				95553725C7614BBC9BCB4AED,
-				CE8713508F7A412EB11985D2,
-				9507AC1A2EBF4F818BF64515,
-				FECCBAC75BDE4C3EBDA2B916,
-				BF4494554F164F70B8AC03CC,
-				FA3B4ECCC29046F58965AA4F,
-				5C147B5D51DE4E748D8E0C51,
-				6EAD308A52564504A730EA38,
-				A897E688530A4581B0F33E1C,
-				2063E7228EC742488D01B284,
-				66043727369D4F7D8F4167CC,
-				5EC68E1C234E454C96CAE0ED,
-				5714FF590B0D4FD4A2510D44,
-				5FCDB11C7D7F41818457D2E2,
-				38A21FF7D6CF458B939F030D,
-				E20577949AAB4F42B1043AA5
+				D8C9F4D41B6D4F349A0D6680,
+				0BC645CFB75E44109C833C4F,
+				21FE6749FDF24CA59499A007,
+				BA8F3CBF6F7947CF835476B9,
+				8A22C5C4742F48D3A57050CA,
+				389EAB92A19B4561B159FCAD,
+				D4F2BB4BD7B44DD1B7100C7E,
+				672326A3179C4F3A90682D68,
+				377CEA754A6C459BA60D0084,
+				C06AC08606DE43A89A1590C8,
+				D838987D613C4371A0A338A7,
+				818E83ACB0394FEA84DA48B6,
+				3B6B9D9849D140E38F73119B,
+				942F96E72D84443BB0555213,
+				1D120A8C54C849FF99105768,
+				C646ED0B59B24CC0BE95B69C,
+				07DFB78DFFE34215B56B6482,
+				4818817C8A0349CBA61C81D4,
+				F7329CC720354897948D5380,
+				A6F7086821614CBEB85BD91E,
+				12F14C9459BF45DA93A6A3B9,
+				7D2E124CCF6945238DD66D79,
+				AF4EE2AFA9CD4C5D98FF5080,
+				43FCE797197C41AE8FD4814A,
+				BBFD4653E0824D85B1B9E91D,
+				BA62587FD16D4DCB9A9D5456,
+				B5CBEDC6FE72432E9C65A91C,
+				E8EF8345D2B54D40A46C1BF6,
+				4DC04BA3C8A84949A1D46919,
+				BF0C3EB655044B118A7E868F,
+				11D745BAB4434E97ADDFE5F8,
+				D346B58C85BC4F6B97F9D0EF,
+				2743C3F5282E4C12B721396F,
+				E1E74B02BC274E44ADE18517,
+				0269479E659A4677848E3125,
+				6B9E8F74C90C44AE8B301317,
+				0542BA7F5CF44F1E90A49E66
 			);
 			name = Sources;
 			sourceTree = <group>;
 		};
-		39E88ABBF9F84C02BE31C704 = {
+		A80496034CE844FE8DA0C570 = {
 			isa = PBXGroup;
 			children = (
-				C429AD31DE084D40AB0A8A48,
-				4E3E7CC1A9AB45D1B14C6AAA,
-				0D5903E715334D46A08CAE22,
-				CFAE361A55B647DEA41EAFBC,
-				ACCFF825534D4351A66C2FCC,
-				2A0AEAD862504425A8066921,
-				E4942ED2EA13498C8B7FF2AC
+				02DAA9FC96484E7D8D0CB74D,
+				BCCF0FD7E2134C4AAB388B68,
+				B555B10917C249AD86B45BF7,
+				448C0DFC5EB2477BBC847C2F,
+				8FB9E85A74B64B2AB9BF1B28,
+				909FFDEBF95247FAADCD880D,
+				A1FA7553B50040B691C951EA
 			);
 			name = Frameworks;
 			sourceTree = <group>;
 		};
-		932A0786A1C34B2380A2E439 = {
+		362BA932E8B149C3BF3FAEEB = {
 			isa = PBXGroup;
 			children = (
-				865F56B87AFE46949CC6E7F5,
-				76017BD1A0624E448F922669,
-				A715D5AB8D954437B1BA15A0,
-				4CF1D2E43C0F4947B3992921
+				A1068951F9F44BA1B0683CF1,
+				7962F53B1DFE4B238D77247B,
+				AFB79BE87B4B463890596699,
+				66A0FE8549EE43E09724898A
 			);
 			name = Resources;
 			sourceTree = <group>;
 		};
-		57D77F8EB6FA4A41A544A9A2 = {
+		3E2DE4C8CE8045AFBB41BBF8 = {
 			isa = PBXGroup;
 			children = (
-				961A05810A784BB78F8B8400
+				E49EFE3CF9554A0DBD693949
 			);
 			name = Products;
 			sourceTree = <group>;
 		};
-		3236AB25C33F4E40B07ACBD7 = {
+		A266473797604C37BA472F30 = {
 			isa = PBXGroup;
 			children = (
-				0E98F969E06A458F9212B001,
-				39E88ABBF9F84C02BE31C704,
-				932A0786A1C34B2380A2E439,
-				57D77F8EB6FA4A41A544A9A2
+				1DEB4CD5D71F40408EB2A1AD,
+				A80496034CE844FE8DA0C570,
+				362BA932E8B149C3BF3FAEEB,
+				3E2DE4C8CE8045AFBB41BBF8
 			);
 			sourceTree = <group>;
 		};
-		346BE81900CD4EE5A949C0EC = {
+		4D8C2B1ED85444DDAB5FB9CC = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F54F9483A209495D96256E63,
-				6BE6B4B9876044DCB871C326,
-				225C947238B740AF8E7F03A3,
-				E8D47E06EEB44643B1A5E4B8,
-				CF75DCA991FF42E5A7817255,
-				45DF37427F224149A00B8C75,
-				C19DF2D275A24252A3BDAA0B,
-				F2E7EA16545540B78EE9C08B,
-				DB25F21009454A549E8EFA45,
-				00D9677A283249C68D52D9D8,
-				27393F4DB9424CAD9E9140A3,
-				8951AD8735274E6AAD258030,
-				51E529FFC30A4D149E7D615C,
-				A45A794464AF4E81B680755B,
-				A8A10A953F824EE0B9AEF1C2
+				D8C9F4D41B6D4F349A0D6680,
+				0BC645CFB75E44109C833C4F,
+				21FE6749FDF24CA59499A007,
+				BA8F3CBF6F7947CF835476B9,
+				8A22C5C4742F48D3A57050CA,
+				389EAB92A19B4561B159FCAD,
+				D4F2BB4BD7B44DD1B7100C7E,
+				672326A3179C4F3A90682D68,
+				377CEA754A6C459BA60D0084,
+				C06AC08606DE43A89A1590C8,
+				D838987D613C4371A0A338A7,
+				818E83ACB0394FEA84DA48B6,
+				3B6B9D9849D140E38F73119B,
+				942F96E72D84443BB0555213,
+				1D120A8C54C849FF99105768,
+				C646ED0B59B24CC0BE95B69C,
+				07DFB78DFFE34215B56B6482,
+				4818817C8A0349CBA61C81D4,
+				F7329CC720354897948D5380
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		6BC7CCB0BC034F78AB5C5D79 = {
+		276F4BB74ED04A58A5F00E8B = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				865F56B87AFE46949CC6E7F5,
-				76017BD1A0624E448F922669,
-				A715D5AB8D954437B1BA15A0
+				A1068951F9F44BA1B0683CF1,
+				7962F53B1DFE4B238D77247B,
+				AFB79BE87B4B463890596699
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		B65B0FBDF19047C9AA9FFD37 = {
+		ADB382F5294B4618891F55E7 = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C429AD31DE084D40AB0A8A48,
-				4E3E7CC1A9AB45D1B14C6AAA,
-				0D5903E715334D46A08CAE22,
-				CFAE361A55B647DEA41EAFBC,
-				ACCFF825534D4351A66C2FCC,
-				2A0AEAD862504425A8066921,
-				E4942ED2EA13498C8B7FF2AC
+				02DAA9FC96484E7D8D0CB74D,
+				BCCF0FD7E2134C4AAB388B68,
+				B555B10917C249AD86B45BF7,
+				448C0DFC5EB2477BBC847C2F,
+				8FB9E85A74B64B2AB9BF1B28,
+				909FFDEBF95247FAADCD880D,
+				A1FA7553B50040B691C951EA
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		98310730E6864FBEB3AEE33A = {
+		4D15FBDF49A54FF0A89F9744 = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = $(SRCROOT)/shim $(SRCROOT)/../ledgevr/native $(SRCROOT)/../ledgevr/vendor/imgui $(SRCROOT)/native_ios;
@@ -432,7 +464,7 @@
 			};
 			name = Debug;
 		};
-		E1A96220B5F5466FA876626D = {
+		6F2629D18005493DA017A8A6 = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = $(SRCROOT)/shim $(SRCROOT)/../ledgevr/native $(SRCROOT)/../ledgevr/vendor/imgui $(SRCROOT)/native_ios;
@@ -456,7 +488,7 @@
 			};
 			name = Release;
 		};
-		5D68107935BB43D8942D4E8B = {
+		42704776AD164E08A2BB94D1 = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				AlwaysSearchUserPaths = NO;
@@ -468,7 +500,7 @@
 			};
 			name = Debug;
 		};
-		A6F563753CE74C9FBD1142C2 = {
+		9C5982C69B294B328A0E2504 = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				AlwaysSearchUserPaths = NO;
@@ -480,42 +512,42 @@
 			};
 			name = Release;
 		};
-		1B64BFAD5B784C8CABA9E56F = {
+		7D9DC31D5EC047ED8E7C4031 = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E1A96220B5F5466FA876626D,
-				98310730E6864FBEB3AEE33A
+				6F2629D18005493DA017A8A6,
+				4D15FBDF49A54FF0A89F9744
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3AD9AF1D1FAF4C0E83E8D781 = {
+		C8CD79559A7C4230BA494EDC = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A6F563753CE74C9FBD1142C2,
-				5D68107935BB43D8942D4E8B
+				9C5982C69B294B328A0E2504,
+				42704776AD164E08A2BB94D1
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		032088EAA07043198519A26D = {
+		4BDA1B38769743CCABB4A935 = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1B64BFAD5B784C8CABA9E56F;
+			buildConfigurationList = 7D9DC31D5EC047ED8E7C4031;
 			buildPhases = (
-				346BE81900CD4EE5A949C0EC,
-				B65B0FBDF19047C9AA9FFD37,
-				6BC7CCB0BC034F78AB5C5D79
+				4D8C2B1ED85444DDAB5FB9CC,
+				ADB382F5294B4618891F55E7,
+				276F4BB74ED04A58A5F00E8B
 			);
 			buildRules = ( );
 			dependencies = ( );
 			name = LEDGE;
 			productName = LEDGE;
-			productReference = 961A05810A784BB78F8B8400;
+			productReference = E49EFE3CF9554A0DBD693949;
 			productType = com.apple.product-type.application;
 		};
-		86FF47AA7F6E400CAEF4A361 = {
+		B23DC17075B844C8A7614ABE = {
 			isa = PBXProject;
-			buildConfigurationList = 3AD9AF1D1FAF4C0E83E8D781;
+			buildConfigurationList = C8CD79559A7C4230BA494EDC;
 			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -523,14 +555,14 @@
 				en,
 				Base
 			);
-			mainGroup = 3236AB25C33F4E40B07ACBD7;
-			productRefGroup = 57D77F8EB6FA4A41A544A9A2;
+			mainGroup = A266473797604C37BA472F30;
+			productRefGroup = 3E2DE4C8CE8045AFBB41BBF8;
 			projectDirPath = ;
 			projectRoot = ;
 			targets = (
-				032088EAA07043198519A26D
+				4BDA1B38769743CCABB4A935
 			);
 		};
 	};
-	rootObject = 86FF47AA7F6E400CAEF4A361;
+	rootObject = B23DC17075B844C8A7614ABE;
 }

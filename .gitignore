@@ -29,3 +29,5 @@ scripts/pd*.c
 .DS_Store
 .env
 
+ledgevr-ios/build_ios/
+toolchain-ios/
