@@ -31,10 +31,11 @@ dl https://maven.aliyun.com/repository/public/org/eclipse/jdt/ecj/3.33.0/ecj-3.3
 dl https://dl.google.com/android/maven2/com/android/tools/r8/8.3.37/r8-8.3.37.jar $TC/r8.jar
 
 # 5. iPhoneOS16.5 SDK (sparse clone, only that dir)
-cd /home/z/my-project/toolchain-ios 2>/dev/null && ls iPhoneOS16.5.sdk >/dev/null 2>&1 || {
+[ -d /home/z/my-project/toolchain-ios/sdks/iPhoneOS16.5.sdk ] || {
   rm -rf /home/z/my-project/toolchain-ios
   git clone --depth 1 --filter=blob:none --sparse https://github.com/theos/sdks.git /home/z/my-project/toolchain-ios 2>&1 | tail -1
   cd /home/z/my-project/toolchain-ios && git sparse-checkout set iPhoneOS16.5.sdk
+  mkdir -p sdks && mv iPhoneOS16.5.sdk sdks/
 }
 ls /home/z/my-project/toolchain-ios/sdks/iPhoneOS16.5.sdk >/dev/null 2>&1 && echo "ios sdk ok" || echo "ios sdk MISSING"
 
