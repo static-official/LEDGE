@@ -145,10 +145,11 @@
     [self touchesEnded:touches withEvent:event];
 }
 
-// rotate with the device: keep portrait locked (HUD layout assumes portrait)
-- (BOOL)shouldAutorotate { return NO; }
+// rotate with the device: landscape 16:9 like the Android mobile build
+// (sensorLandscape) — HUD layout is proportional and adapts to w/h
+- (BOOL)shouldAutorotate { return YES; }
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
-    return UIInterfaceOrientationMaskPortrait;
+    return UIInterfaceOrientationMaskLandscape;
 }
 
 @end

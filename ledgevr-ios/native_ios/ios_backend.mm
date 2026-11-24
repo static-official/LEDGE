@@ -14,45 +14,50 @@ namespace lv {
 // EAGL lifecycle
 // ---------------------------------------------------------------------------
 bool IosBackend::init(CAEAGLLayer* l, int width, int height) {
+    (void)width; (void)height;
     if (!ctxReady) {
         ctx = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
         if (!ctx || ![EAGLContext setCurrentContext:ctx]) {
             LOGE("iOS: EAGL ES3 context failed");
             return false;
         }
-        layer = l;
-        layer.drawableProperties = @{
-            kEAGLDrawablePropertyColorFormat : kEAGLColorFormatRGBA8,
-            kEAGLDrawablePropertyRetainedBacking : @NO,
-        };
-        layer.opaque = YES;
         ctxReady = true;
     }
-    if (!surfReady) {
-        layer.contentsScale = [UIScreen mainScreen].scale;
-        glGenFramebuffers(1, &fb);
-        glGenRenderbuffers(1, &colorRb);
-        glGenRenderbuffers(1, &depthRb);
-        glBindFramebuffer(GL_FRAMEBUFFER, fb);
-        glBindRenderbuffer(GL_RENDERBUFFER, colorRb);
-        if (![ctx renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer]) {
-            LOGE("iOS: renderbufferStorage fromDrawable failed");
-            return false;
-        }
-        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &w);
-        glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &h);
-        glBindRenderbuffer(GL_RENDERBUFFER, depthRb);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRb);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRb);
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            LOGE("iOS: framebuffer incomplete");
-            return false;
-        }
-        surfReady = true;
-        layoutHud();
-        LOGI("iOS: EAGL surface %dx%d ready", w, h);
+    layer = l;
+    layer.drawableProperties = @{
+        kEAGLDrawablePropertyColorFormat : kEAGLColorFormatRGBA8,
+        kEAGLDrawablePropertyRetainedBacking : @NO,
+    };
+    layer.opaque = YES;
+    // rebuild the drawable-sized surface when missing OR resized (rotation)
+    CGFloat scale = [UIScreen mainScreen].scale;
+    int nw = (int)roundf((float)(l.bounds.size.width * scale));
+    int nh = (int)roundf((float)(l.bounds.size.height * scale));
+    if (surfReady && nw == w && nh == h) return true;
+    if (surfReady) detachSurface();
+    layer.contentsScale = scale;
+    glGenFramebuffers(1, &fb);
+    glGenRenderbuffers(1, &colorRb);
+    glGenRenderbuffers(1, &depthRb);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb);
+    glBindRenderbuffer(GL_RENDERBUFFER, colorRb);
+    if (![ctx renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer]) {
+        LOGE("iOS: renderbufferStorage fromDrawable failed");
+        return false;
     }
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &w);
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &h);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthRb);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRb);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRb);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        LOGE("iOS: framebuffer incomplete");
+        return false;
+    }
+    surfReady = true;
+    layoutHud();
+    LOGI("iOS: EAGL surface %dx%d ready", w, h);
     return surfReady;
 }
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # LEDGE iOS — cross-compile on Linux: NDK clang 17 (Mach-O arm64) + ld64.lld
 # + iPhoneOS16.5 SDK (theos/sdks). Produces an UNSIGNED, signable IPA.
-#   scripts/build_ios_ipa.sh            -> download/LEDGE_v1.2_unsigned.ipa
+#   scripts/build_ios_ipa.sh            -> download/LEDGE_v1.3_unsigned.ipa
 set -e
 BASE=/home/z/my-project
 SDK=$BASE/toolchain-ios/sdks/iPhoneOS16.5.sdk
@@ -62,12 +62,12 @@ echo "link ok"
 # literal plist values (Xcode normally substitutes $(...) — a hand-built .app
 # must carry real values or dyld can't resolve CFBundleExecutable)
 sed -e 's/\$(EXECUTABLE_NAME)/LEDGE/' \
-    -e 's/\$(MARKETING_VERSION)/1.2/' \
-    -e 's/\$(CURRENT_PROJECT_VERSION)/3/' \
+    -e 's/\$(MARKETING_VERSION)/1.3/' \
+    -e 's/\$(CURRENT_PROJECT_VERSION)/4/' \
     -e 's/\$(PRODUCT_BUNDLE_IDENTIFIER)/com.moonydev.ledge.ios/' \
     $IOS/native_ios/Info.plist > $APP/Info.plist
 echo -n "APPL????" > $APP/PkgInfo
 cp -R $IOS/Resources/music $IOS/Resources/sfx $IOS/Resources/tex $APP/
-rm -f $BASE/download/LEDGE_v1.2_unsigned.ipa
-cd $OUT && zip -qry $BASE/download/LEDGE_v1.2_unsigned.ipa Payload
-echo "IPA: $BASE/download/LEDGE_v1.2_unsigned.ipa ($(du -h $BASE/download/LEDGE_v1.2_unsigned.ipa | cut -f1))"
+rm -f $BASE/download/LEDGE_v1.3_unsigned.ipa
+cd $OUT && zip -qry $BASE/download/LEDGE_v1.3_unsigned.ipa Payload
+echo "IPA: $BASE/download/LEDGE_v1.3_unsigned.ipa ($(du -h $BASE/download/LEDGE_v1.3_unsigned.ipa | cut -f1))"

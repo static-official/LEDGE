@@ -2,12 +2,27 @@
 // and ios_backend.h; Android defines them in touch_backend.cpp/xr_backend.cpp).
 #include "../shim/GLES3/gl32.h"
 #include <cstdio>
+#include <string>
 
 namespace lv {
 
+// Apple GPUs cap at OpenGL ES 3.0 (GLSL ES 3.00) — never 3.1/3.2. The shared
+// engine shaders are written as "#version 320 es"; retarget them exactly like
+// the Android build does for pre-3.2 devices (touch_backend.cpp shimVersion).
+static std::string shimVersion(const char* src) {
+    std::string s(src);
+    const std::string from = "#version 320 es";
+    const std::string to = "#version 300 es";
+    size_t p = s.find(from);
+    if (p != std::string::npos) s.replace(p, from.size(), to);
+    return s;
+}
+
 GLuint lvCompileShader(GLenum type, const char* src) {
     GLuint sh = glCreateShader(type);
-    glShaderSource(sh, 1, &src, nullptr);
+    std::string shimmed = shimVersion(src);
+    const char* c = shimmed.c_str();
+    glShaderSource(sh, 1, &c, nullptr);
     glCompileShader(sh);
     GLint ok = 0;
     glGetShaderiv(sh, GL_COMPILE_STATUS, &ok);
