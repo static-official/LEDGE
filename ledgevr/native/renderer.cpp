@@ -3,7 +3,7 @@
 #include "xr_backend.h"
 #include "assets.h"
 #include "log.h"
-#include <imgui.h>
+#include "ledui/ledui.h"
 #include <cstring>
 #include <cmath>
 #include <algorithm>
@@ -399,18 +399,18 @@ bool WorldTextRenderer::init() {
 void WorldTextRenderer::setAtlas(GLuint tex, float w, float h) {
     fontTex = tex; texW = w; texH = h;
     glyphs.clear();
-    ImFontAtlas* atlas = ImGui::GetIO().Fonts;
+    ledui::FontAtlas* atlas = ledui::GetIO().Fonts;
     if (!atlas) return;
-    ImFont* font = atlas->Fonts[0];
-    for (int cp = 32; cp < 0x2FFF; cp++) {
-        const ImWchar c = (ImWchar)cp;
-        const ImFontGlyph* g = font->FindGlyphNoFallback(c);
-        if (!g || g->Visible == 0) continue;
+    ledui::Font* font = atlas->Fonts[0];
+    for (int cp = 32; cp <= 127; cp++) {
+        const unsigned int c = (unsigned int)cp;
+        const ledui::Glyph* g = font->FindGlyphNoFallback(c);
+        if (!g) continue;
         Glyph gl;
         gl.cp = (uint32_t)cp;
         gl.u0 = g->U0; gl.v0 = g->V0; gl.u1 = g->U1; gl.v1 = g->V1;
         gl.x0 = g->X0; gl.y0 = g->Y0; gl.x1 = g->X1; gl.y1 = g->Y1;
-        gl.xadv = g->AdvanceX;
+        gl.xadv = g->XAdvance;
         glyphs.push_back(gl);
     }
 }
@@ -427,7 +427,7 @@ void WorldTextRenderer::addText(const std::string& text, const vec3& pos, float 
 
 void WorldTextRenderer::render(const float* proj, const float* view) {
     if (g_wtextCmds.empty() || glyphs.empty() || !fontTex) return;
-    ImFontAtlas* atlas = ImGui::GetIO().Fonts;
+    ledui::FontAtlas* atlas = ledui::GetIO().Fonts;
     float fontPx = atlas->Fonts[0]->FontSize;
 
     glUseProgram(program);

@@ -16,7 +16,7 @@ LOG=$OUT/build.log
 
 CSTD="-std=gnu++17 -nostdinc++ -isystem $SDK/usr/include/c++/v1"
 COMMON="-target arm64-apple-ios13.0 -isysroot $SDK -B$NB -O2 -fno-strict-aliasing \
-  -fvisibility=default -I$IOS/shim -I$NAT -I$NAT/include_openxr -I$IMG -I$IOS/native_ios"
+  -fvisibility=default -I$IOS/shim -I$NAT -I$NAT/include_openxr -I$IOS/native_ios"
 FWS="-framework UIKit -framework Foundation -framework OpenGLES -framework QuartzCore \
   -framework AVFoundation -framework CoreGraphics -framework GLKit"
 LIBS="-lobjc -lc++ -lc++abi -lz"
@@ -38,10 +38,8 @@ cc() {
 for f in renderer world photon playfab save textures; do
   cc $NAT/$f.cpp $OBJ/${f}_cpp.o
 done
-# ---- vendored imgui ----
-for f in imgui imgui_draw imgui_tables imgui_widgets; do
-  cc $IMG/$f.cpp $OBJ/${f}_cpp.o
-done
+# ---- ledui (ImGui-styled immediate UI) ----
+cc $NAT/ledui/ledui.cpp $OBJ/ledui_cpp.o
 # ---- iOS platform layer (ObjC++/ARC) ----
 for f in main_entry main_ios ios_gl ios_backend ios_host AppDelegate GameViewController; do
   cc $IOS/native_ios/$f.mm $OBJ/${f}_mm.o -fobjc-arc -fblocks

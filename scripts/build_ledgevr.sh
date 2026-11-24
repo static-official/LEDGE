@@ -12,12 +12,12 @@ rm -rf $OUT/obj $OUT/dex $OUT/classes $OUT/check
 mkdir -p $OUT/libs/arm64-v8a $OUT/obj $OUT/dex
 
 SYS="--sysroot=$NDK/toolchains/llvm/prebuilt/linux-x86_64/sysroot -isystem $NDK/sources/cxx-stl/llvm-libc++/include -isystem $NDK/sources/cxx-stl/llvm-libc++abi/include"
-INC="-I$PROJ/native -I$PROJ/native/include_openxr -I$PROJ/vendor/imgui"
+INC="-I$PROJ/native -I$PROJ/native/include_openxr"
 FLAGS="-std=c++17 -O2 -fPIC -march=armv8-a -DANDROID -D__ANDROID_API__=26 -fexceptions -frtti -Wno-unused-parameter -Wno-missing-field-initializers"
 FLAGS_C="-O2 -fPIC -march=armv8-a -DANDROID -D__ANDROID_API__=26 -Wno-unused-parameter -Wno-missing-field-initializers"
 
 echo "== compiling native =="
-SRC="$PROJ/native/main.cpp $PROJ/native/xr_backend.cpp $PROJ/native/renderer.cpp $PROJ/native/world.cpp $PROJ/native/photon.cpp $PROJ/native/save.cpp $PROJ/native/playfab.cpp $PROJ/native/textures.cpp $PROJ/native/jnihost.cpp $PROJ/native/android_native_app_glue.c $PROJ/vendor/imgui/imgui.cpp $PROJ/vendor/imgui/imgui_draw.cpp $PROJ/vendor/imgui/imgui_tables.cpp $PROJ/vendor/imgui/imgui_widgets.cpp"
+SRC="$PROJ/native/main.cpp $PROJ/native/xr_backend.cpp $PROJ/native/renderer.cpp $PROJ/native/world.cpp $PROJ/native/photon.cpp $PROJ/native/save.cpp $PROJ/native/playfab.cpp $PROJ/native/textures.cpp $PROJ/native/jnihost.cpp $PROJ/native/android_native_app_glue.c $PROJ/native/ledui/ledui.cpp"
 for f in $SRC; do
   o=$OUT/obj/$(basename $f | tr './' '__').o
   case $f in

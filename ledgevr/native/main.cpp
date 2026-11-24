@@ -2,7 +2,7 @@
 #include <android/native_activity.h>
 #include <android_native_app_glue.h>
 #include <jni.h>
-#include <imgui.h>
+#include "ledui/ledui.h"
 #include <EGL/egl.h>
 #include <GLES3/gl32.h>
 #include <cstring>
@@ -110,8 +110,8 @@ static GLuint gUiFboTex = 0;
 static int gUiW = 1536, gUiH = 1536;
 
 static void uiInit() {
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
+    ledui::CreateContext();
+    ledui::IO& io = ledui::GetIO();
     io.Fonts->AddFontDefault();
     unsigned char* pixels = nullptr;
     int w = 0, h = 0;
@@ -121,38 +121,38 @@ static void uiInit() {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    io.Fonts->TexID = (ImTextureID)(intptr_t)gUiFboTex;
+    io.Fonts->TexID = (ledui::TextureID)(intptr_t)gUiFboTex;
     G.R.wtext.setAtlas((GLuint)(intptr_t)io.Fonts->TexID, (float)w, (float)h);
-    ImGui::StyleColorsDark();
-    ImGuiStyle& st = ImGui::GetStyle();
+    ledui::StyleColorsDark();
+    ledui::Style& st = ledui::GetStyle();
     st.WindowRounding = 12;
     st.FrameRounding = 8;
     st.GrabRounding = 8;
     st.TabRounding = 8;
-    ImVec4* c = st.Colors;
-    c[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.14f, 0.19f, 0.97f);
-    c[ImGuiCol_TitleBg] = ImVec4(0.15f, 0.16f, 0.23f, 1.0f);
-    c[ImGuiCol_TitleBgActive] = ImVec4(0.24f, 0.30f, 0.42f, 1.0f);
-    c[ImGuiCol_Button] = ImVec4(0.30f, 0.38f, 0.55f, 1.0f);
-    c[ImGuiCol_ButtonHovered] = ImVec4(0.42f, 0.52f, 0.72f, 1.0f);
-    c[ImGuiCol_ButtonActive] = ImVec4(0.24f, 0.30f, 0.42f, 1.0f);
-    c[ImGuiCol_Tab] = ImVec4(0.24f, 0.28f, 0.40f, 1.0f);
-    c[ImGuiCol_TabActive] = ImVec4(0.38f, 0.46f, 0.66f, 1.0f);
-    c[ImGuiCol_CheckMark] = ImVec4(0.65f, 0.85f, 1.0f, 1.0f);
-    c[ImGuiCol_SliderGrab] = ImVec4(0.55f, 0.75f, 0.95f, 1.0f);
-    c[ImGuiCol_Text] = ImVec4(0.94f, 0.95f, 1.0f, 1.0f);
+    ledui::Vec4* c = st.Colors;
+    c[ledui::Col_WindowBg] = ledui::Vec4(0.13f, 0.14f, 0.19f, 0.97f);
+    c[ledui::Col_TitleBg] = ledui::Vec4(0.15f, 0.16f, 0.23f, 1.0f);
+    c[ledui::Col_TitleBgActive] = ledui::Vec4(0.24f, 0.30f, 0.42f, 1.0f);
+    c[ledui::Col_Button] = ledui::Vec4(0.30f, 0.38f, 0.55f, 1.0f);
+    c[ledui::Col_ButtonHovered] = ledui::Vec4(0.42f, 0.52f, 0.72f, 1.0f);
+    c[ledui::Col_ButtonActive] = ledui::Vec4(0.24f, 0.30f, 0.42f, 1.0f);
+    c[ledui::Col_Tab] = ledui::Vec4(0.24f, 0.28f, 0.40f, 1.0f);
+    c[ledui::Col_TabActive] = ledui::Vec4(0.38f, 0.46f, 0.66f, 1.0f);
+    c[ledui::Col_CheckMark] = ledui::Vec4(0.65f, 0.85f, 1.0f, 1.0f);
+    c[ledui::Col_SliderGrab] = ledui::Vec4(0.55f, 0.75f, 0.95f, 1.0f);
+    c[ledui::Col_Text] = ledui::Vec4(0.94f, 0.95f, 1.0f, 1.0f);
 }
 
 static GLuint gUiVao = 0, gUiVbo = 0, gUiIbo = 0;
-static void ImGui_ImplNewFrame();
+static void uiNewFrame();
 static int mainLoop(android_app* app);
 
-static void uiRenderFrame(const ImVec2& sizePx) {
-    ImGuiIO& io = ImGui::GetIO();
+static void uiRenderFrame(const ledui::Vec2& sizePx) {
+    ledui::IO& io = ledui::GetIO();
     io.DisplaySize = sizePx;
     io.DeltaTime = 1.0f / 72.0f;
-    ImGui::Render();
-    ImDrawData* dd = ImGui::GetDrawData();
+    ledui::Render();
+    ledui::DrawData* dd = ledui::GetDrawData();
     if (!dd) return;
     glViewport(0, 0, (GLsizei)sizePx.x, (GLsizei)sizePx.y);
     glClearColor(0, 0, 0, 0);
@@ -172,21 +172,21 @@ static void uiRenderFrame(const ImVec2& sizePx) {
         glBindVertexArray(gUiVao);
         glBindBuffer(GL_ARRAY_BUFFER, gUiVbo);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (void*)offsetof(ImDrawVert, pos));
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(ledui::DrawVert), (void*)offsetof(ledui::DrawVert, pos));
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ImDrawVert), (void*)offsetof(ImDrawVert, uv));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(ledui::DrawVert), (void*)offsetof(ledui::DrawVert, uv));
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ImDrawVert), (void*)offsetof(ImDrawVert, col));
+        glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(ledui::DrawVert), (void*)offsetof(ledui::DrawVert, col));
     }
     for (int n = 0; n < dd->CmdListsCount; n++) {
-        const ImDrawList* cl = dd->CmdLists[n];
+        const ledui::DrawList* cl = dd->CmdLists[n];
         glBindVertexArray(gUiVao);
         glBindBuffer(GL_ARRAY_BUFFER, gUiVbo);
-        glBufferData(GL_ARRAY_BUFFER, cl->VtxBuffer.Size * sizeof(ImDrawVert), cl->VtxBuffer.Data, GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, cl->VtxBuffer.Size * sizeof(ledui::DrawVert), cl->VtxBuffer.Data, GL_STREAM_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gUiIbo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, cl->IdxBuffer.Size * sizeof(ImDrawIdx), cl->IdxBuffer.Data, GL_STREAM_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, cl->IdxBuffer.Size * sizeof(ledui::DrawIdx), cl->IdxBuffer.Data, GL_STREAM_DRAW);
         for (int ci = 0; ci < cl->CmdBuffer.Size; ci++) {
-            const ImDrawCmd& cmd = cl->CmdBuffer[ci];
+            const ledui::DrawCmd& cmd = cl->CmdBuffer[ci];
             if (cmd.UserCallback) continue;
             glScissor((int)cmd.ClipRect.x, (int)(sizePx.y - cmd.ClipRect.w),
                       (int)(cmd.ClipRect.z - cmd.ClipRect.x), (int)(cmd.ClipRect.w - cmd.ClipRect.y));
@@ -205,117 +205,117 @@ static void uiRenderFrame(const ImVec2& sizePx) {
 // menu screens
 // ---------------------------------------------------------------------------
 static void drawMenu() {
-    ImGuiIO& io = ImGui::GetIO();
-    ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::SetNextWindowSize(io.DisplaySize);
-    ImGui::Begin("##LEDGE", nullptr,
-                 ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings);
+    ledui::IO& io = ledui::GetIO();
+    ledui::SetNextWindowPos(ledui::Vec2(0, 0));
+    ledui::SetNextWindowSize(io.DisplaySize);
+    ledui::Begin("##LEDGE", nullptr,
+                 ledui::WinFlags::NoDecoration | ledui::WinFlags::NoMove | ledui::WinFlags::NoSavedSettings);
 
     const char* tabs[] = { "Home", "Lobbies", "People", "Levels", "Editor", "Settings", "Cosmetics", "Account" };
     for (int i = 0; i < 8; i++) {
-        if (ImGui::Button(tabs[i], ImVec2(ImGui::GetContentRegionAvail().x / 8.0f - 4, 56))) {
+        if (ledui::Button(tabs[i], ledui::Vec2(ledui::GetContentRegionAvail().x / 8.0f - 4, 56))) {
             if (G.menuTab != i) jni().sfx(SFX_CLICK);   // 1.1 UI click
             G.menuTab = i;
         }
-        if (i < 7) ImGui::SameLine();
+        if (i < 7) ledui::SameLine();
     }
-    ImGui::Separator();
-    ImGui::Text("LEDGE VR  |  %s  |  Photon: %s", G.status.c_str(),
+    ledui::Separator();
+    ledui::Text("LEDGE VR  |  %s  |  Photon: %s", G.status.c_str(),
                 G.pc.status == PH_InRoom ? "connected" : photonStatusName((int)G.pc.status));
 
     switch (G.menuTab) {
     case 0: { // Home
-        ImGui::TextWrapped("Welcome to LEDGE VR! Hold GRIP to grab the world and pull yourself, "
+        ledui::TextWrapped("Welcome to LEDGE VR! Hold GRIP to grab the world and pull yourself, "
                            "release to fling. Left stick walks. The three-lines button opens this menu. "
                            "1.1: press A to DANCE, B to WAVE, click the left stick to TAUNT — "
                            "everyone in the room sees it!");
-        ImGui::Separator();
-        ImGui::Text("Emotes:");
-        if (ImGui::Button("Wave##vw", ImVec2(150, 50))) startEmote(EM_WAVE);
-        ImGui::SameLine();
-        if (ImGui::Button("Dance##vd", ImVec2(150, 50))) startEmote(EM_DANCE);
-        ImGui::SameLine();
-        if (ImGui::Button("Taunt##vt", ImVec2(150, 50))) startEmote(EM_TAUNT);
-        ImGui::Separator();        if (ImGui::Button(G.pc.status == PH_InRoom ? "In lobby room" : "Quick join LEDGE-Public",
-                          ImVec2(340, 70))) {
+        ledui::Separator();
+        ledui::Text("Emotes:");
+        if (ledui::Button("Wave##vw", ledui::Vec2(150, 50))) startEmote(EM_WAVE);
+        ledui::SameLine();
+        if (ledui::Button("Dance##vd", ledui::Vec2(150, 50))) startEmote(EM_DANCE);
+        ledui::SameLine();
+        if (ledui::Button("Taunt##vt", ledui::Vec2(150, 50))) startEmote(EM_TAUNT);
+        ledui::Separator();        if (ledui::Button(G.pc.status == PH_InRoom ? "In lobby room" : "Quick join LEDGE-Public",
+                          ledui::Vec2(340, 70))) {
             if (G.pc.status == PH_InRoom) G.pc.leaveRoom();
             else G.pc.joinRoom("LEDGE-Public", 16);
         }
-        ImGui::SameLine();
-        if (ImGui::Button("Leave room", ImVec2(220, 70)))
+        ledui::SameLine();
+        if (ledui::Button("Leave room", ledui::Vec2(220, 70)))
             if (G.pc.status == PH_InRoom) G.pc.leaveRoom();
-        ImGui::Text("Players here: %d", (int)G.pc.actors.size());
+        ledui::Text("Players here: %d", (int)G.pc.actors.size());
         break;
     }
     case 1: { // Lobbies — join / leave / create with room code
         static char roomCode[64] = "LEDGE-Public";
-        ImGui::InputText("Room code", roomCode, sizeof(roomCode));
-        if (ImGui::Button("Join / Create", ImVec2(240, 60)))
+        ledui::InputText("Room code", roomCode, sizeof(roomCode));
+        if (ledui::Button("Join / Create", ledui::Vec2(240, 60)))
             G.pc.joinRoom(roomCode, 16);
-        ImGui::SameLine();
-        if (ImGui::Button("Leave", ImVec2(140, 60))) G.pc.leaveRoom();
-        ImGui::Separator();
-        ImGui::Text("Open rooms (Photon lobby):");
-        if (G.pc.roomList.empty()) ImGui::Text("  (lobby list empty — join the public room instead)");
+        ledui::SameLine();
+        if (ledui::Button("Leave", ledui::Vec2(140, 60))) G.pc.leaveRoom();
+        ledui::Separator();
+        ledui::Text("Open rooms (Photon lobby):");
+        if (G.pc.roomList.empty()) ledui::Text("  (lobby list empty — join the public room instead)");
         for (auto& r : G.pc.roomList) {
             char label[128];
             snprintf(label, sizeof(label), "%s  (%d/%d)%s", r.name.c_str(), r.playerCount,
                      r.maxPlayers, r.isOpen ? "" : " [closed]");
-            if (ImGui::Button(label, ImVec2(420, 54))) G.pc.joinRoom(r.name, 16);
+            if (ledui::Button(label, ledui::Vec2(420, 54))) G.pc.joinRoom(r.name, 16);
         }
         break;
     }
     case 2: { // People — add people, see players
         static char person[64] = "";
-        ImGui::InputText("Add person (name/user id)", person, sizeof(person));
-        ImGui::SameLine();
-        if (ImGui::Button("Add", ImVec2(120, 48)) && person[0]) {
+        ledui::InputText("Add person (name/user id)", person, sizeof(person));
+        ledui::SameLine();
+        if (ledui::Button("Add", ledui::Vec2(120, 48)) && person[0]) {
             G.save.friends.push_back(person);
             G.store.save(G.save);
             person[0] = 0;
         }
-        ImGui::Text("Friends (%d):", (int)G.save.friends.size());
+        ledui::Text("Friends (%d):", (int)G.save.friends.size());
         for (size_t i = 0; i < G.save.friends.size(); i++) {
             char label[160];
             snprintf(label, sizeof(label), "%s  %s", G.save.friends[i].c_str(),
                      G.pc.actorNames.size() ? "" : "");
-            ImGui::BulletText("%s", G.save.friends[i].c_str());
-            ImGui::SameLine();
+            ledui::BulletText("%s", G.save.friends[i].c_str());
+            ledui::SameLine();
             char rid[32];
             snprintf(rid, sizeof(rid), "rm%zu##f%zu", i, i);
-            if (ImGui::SmallButton(rid)) {
+            if (ledui::SmallButton(rid)) {
                 G.save.friends.erase(G.save.friends.begin() + i);
                 G.store.save(G.save);
             }
         }
-        ImGui::Separator();
-        ImGui::Text("Players in current room:");
+        ledui::Separator();
+        ledui::Text("Players in current room:");
         for (auto& kv : G.pc.actorNames)
-            ImGui::BulletText("actor %d: %s%s", kv.first, kv.second.c_str(),
+            ledui::BulletText("actor %d: %s%s", kv.first, kv.second.c_str(),
                               kv.first == G.pc.actorNr ? " (you)" : "");
         break;
     }
     case 3: { // Levels — search + play built-ins and my levels
         static char query[64] = "";
-        ImGui::InputText("Search levels", query, sizeof(query));
+        ledui::InputText("Search levels", query, sizeof(query));
         auto matches = [](const std::string& n) {
             if (!query[0]) return true;
             return n.find(query) != std::string::npos;
         };
-        ImGui::Text("Featured:");
+        ledui::Text("Featured:");
         static std::vector<Level> featured = builtInLevels();
         for (auto& L : featured) {
             if (!matches(L.name)) continue;
             char label[128];
             snprintf(label, sizeof(label), "%s  by %s  (%d blocks)", L.name.c_str(),
                      L.author.c_str(), (int)L.blocks.size());
-            if (ImGui::Button(label, ImVec2(480, 56))) {
+            if (ledui::Button(label, ledui::Vec2(480, 56))) {
                 G.W.setLevel(L);
                 G.ed.testing = false;
                 pushStatus("playing " + L.name);
             }
         }
-        ImGui::Text("My levels (saved):");
+        ledui::Text("My levels (saved):");
         for (size_t i = 0; i < G.save.myLevels.size(); i++) {
             auto& L = G.save.myLevels[i];
             if (!matches(L.name)) continue;
@@ -323,13 +323,13 @@ static void drawMenu() {
             snprintf(label, sizeof(label), "%s  (%d blocks)", L.name.c_str(), (int)L.blocks.size());
             char id[40];
             snprintf(id, sizeof(id), "p%zu", i);
-            if (ImGui::Button(label, ImVec2(480, 56))) {
+            if (ledui::Button(label, ledui::Vec2(480, 56))) {
                 G.W.setLevel(L);
                 pushStatus("playing " + L.name);
             }
-            ImGui::SameLine();
+            ledui::SameLine();
             snprintf(id, sizeof(id), "pub%zu", i);
-            if (ImGui::Button("Publish")) {
+            if (ledui::Button("Publish")) {
                 if (G.pc.status == PH_InRoom)
                     G.pc.setRoomProps({ { "LEDGE_level_" + std::to_string(i), PV::Str_(L.toJson()) } });
                 pushStatus("published " + L.name + " to room");
@@ -338,44 +338,44 @@ static void drawMenu() {
         break;
     }
     case 4: { // Editor
-        ImGui::Checkbox("Editor active", &G.ed.active);
-        ImGui::Checkbox("Test level (respawn)", &G.ed.testing);
-        ImGui::Separator();
+        ledui::Checkbox("Editor active", &G.ed.active);
+        ledui::Checkbox("Test level (respawn)", &G.ed.testing);
+        ledui::Separator();
         G.W.editorSelected = G.ed.selected;   // keep world selection in sync
         const char* types[] = { "Block", "Ledge", "Spinner", "Spawn", "Goal", "Bouncy" };
         for (int t = 0; t < BT_COUNT; t++) {
-            if (ImGui::RadioButton(types[t], (int)G.ed.palette == t)) G.ed.palette = (BlockType)t;
-            if (t % 3 != 2) ImGui::SameLine();
+            if (ledui::RadioButton(types[t], (int)G.ed.palette == t)) G.ed.palette = (BlockType)t;
+            if (t % 3 != 2) ledui::SameLine();
         }
-        ImGui::Separator();
+        ledui::Separator();
         for (int c = 0; c < kBlockColorCount; c++) {
-            ImGui::PushStyleColor(ImGuiCol_Button,
-                ImVec4(kBlockColors[c].x, kBlockColors[c].y, kBlockColors[c].z, 1));
+            ledui::PushStyleColor(ledui::Col_Button,
+                ledui::Vec4(kBlockColors[c].x, kBlockColors[c].y, kBlockColors[c].z, 1));
             char id[16];
             snprintf(id, sizeof(id), "  ##c%d", c);
-            if (ImGui::Button(id, ImVec2(64, 44))) G.ed.paletteColor = c;
-            ImGui::PopStyleColor();
-            ImGui::SameLine();
+            if (ledui::Button(id, ledui::Vec2(64, 44))) G.ed.paletteColor = c;
+            ledui::PopStyleColor();
+            ledui::SameLine();
         }
-        ImGui::NewLine();
-        ImGui::Separator();
+        ledui::NewLine();
+        ledui::Separator();
         if (G.ed.selected >= 0) {
-            ImGui::Text("Selected block %d", G.ed.selected);
-            if (ImGui::Button("Delete", ImVec2(160, 50))) {
+            ledui::Text("Selected block %d", G.ed.selected);
+            if (ledui::Button("Delete", ledui::Vec2(160, 50))) {
                 G.W.editorDeleteSelected();
                 G.ed.selected = -1;
             }
-            ImGui::SameLine();
-            if (ImGui::Button("Grow +", ImVec2(120, 50))) G.W.editorScaleSelected(vec3(0.5f, 0.5f, 0.5f));
-            ImGui::SameLine();
-            if (ImGui::Button("Shrink -", ImVec2(120, 50))) G.W.editorScaleSelected(vec3(-0.5f, -0.5f, -0.5f));
-            ImGui::SameLine();
-            if (ImGui::Button("Rotate 45°", ImVec2(160, 50))) G.W.editorRotateSelected(45.0f);
+            ledui::SameLine();
+            if (ledui::Button("Grow +", ledui::Vec2(120, 50))) G.W.editorScaleSelected(vec3(0.5f, 0.5f, 0.5f));
+            ledui::SameLine();
+            if (ledui::Button("Shrink -", ledui::Vec2(120, 50))) G.W.editorScaleSelected(vec3(-0.5f, -0.5f, -0.5f));
+            ledui::SameLine();
+            if (ledui::Button("Rotate 45°", ledui::Vec2(160, 50))) G.W.editorRotateSelected(45.0f);
         } else {
-            ImGui::TextWrapped("Point at a block with the right controller and press TRIGGER to select. "
+            ledui::TextWrapped("Point at a block with the right controller and press TRIGGER to select. "
                                "Trigger on empty air places the palette block at the grid cursor.");
         }
-        if (ImGui::Button("Save level", ImVec2(200, 56))) {
+        if (ledui::Button("Save level", ledui::Vec2(200, 56))) {
             G.save.myLevels.push_back(G.W.level);
             G.store.save(G.save);
             pushStatus("saved " + G.W.level.name);
@@ -383,108 +383,108 @@ static void drawMenu() {
         break;
     }
     case 5: { // Settings — customize movement/UI
-        ImGui::Text("Player name:");
+        ledui::Text("Player name:");
         static char pname[64] = "";
         if (pname[0] == 0) snprintf(pname, sizeof(pname), "%s", G.save.settings.playerName.c_str());
-        ImGui::InputText("##pn", pname, sizeof(pname));
-        ImGui::SameLine();
-        if (ImGui::Button("Set", ImVec2(100, 44))) {
+        ledui::InputText("##pn", pname, sizeof(pname));
+        ledui::SameLine();
+        if (ledui::Button("Set", ledui::Vec2(100, 44))) {
             G.save.settings.playerName = pname;
             G.pc.nick = pname;
             if (G.pc.status == PH_InRoom) G.pc.setPlayerProps({ { "n", PV::Str_(pname) } });
             G.store.save(G.save);
         }
-        ImGui::Checkbox("Left-stick strafe", &G.save.settings.strafeEnabled);
-        ImGui::Checkbox("Snap turn", &G.save.settings.snapTurn);
-        ImGui::SliderFloat("Strafe speed", &G.save.settings.strafeSpeed, 1.0f, 6.0f, "%.1f m/s");
-        ImGui::SliderFloat("Fling strength", &G.save.settings.grabStrength, 0.5f, 2.0f);
-        ImGui::Checkbox("Voice chat (open mic)", &G.save.settings.voiceEnabled);
-        ImGui::SliderFloat("Menu size", &G.save.settings.menuScale, 0.6f, 1.8f, "%.1fx");
-        ImGui::Separator();
+        ledui::Checkbox("Left-stick strafe", &G.save.settings.strafeEnabled);
+        ledui::Checkbox("Snap turn", &G.save.settings.snapTurn);
+        ledui::SliderFloat("Strafe speed", &G.save.settings.strafeSpeed, 1.0f, 6.0f, "%.1f m/s");
+        ledui::SliderFloat("Fling strength", &G.save.settings.grabStrength, 0.5f, 2.0f);
+        ledui::Checkbox("Voice chat (open mic)", &G.save.settings.voiceEnabled);
+        ledui::SliderFloat("Menu size", &G.save.settings.menuScale, 0.6f, 1.8f, "%.1fx");
+        ledui::Separator();
         // 1.1 music player
-        ImGui::Text("Music: %s", musicTitle(jni().musicTrack()));
-        ImGui::SameLine();
-        if (ImGui::Button("Next track", ImVec2(180, 44))) jni().musicNext();
-        ImGui::SliderFloat("Music volume", &G.mvol, 0.0f, 1.0f, "%.1f");
-        if (ImGui::IsItemEdited()) jni().musicVol(G.mvol);
-        ImGui::SliderFloat("SFX volume", &G.svol, 0.0f, 1.0f, "%.1f");
-        if (ImGui::IsItemEdited()) jni().sfxVol(G.svol);
-        ImGui::Separator();
-        ImGui::Text("Photon region:");
+        ledui::Text("Music: %s", musicTitle(jni().musicTrack()));
+        ledui::SameLine();
+        if (ledui::Button("Next track", ledui::Vec2(180, 44))) jni().musicNext();
+        ledui::SliderFloat("Music volume", &G.mvol, 0.0f, 1.0f, "%.1f");
+        if (ledui::IsItemEdited()) jni().musicVol(G.mvol);
+        ledui::SliderFloat("SFX volume", &G.svol, 0.0f, 1.0f, "%.1f");
+        if (ledui::IsItemEdited()) jni().sfxVol(G.svol);
+        ledui::Separator();
+        ledui::Text("Photon region:");
         static const char* regions[] = { "eu", "us", "asia", "jp", "au", "kr", "ca", "sa", "in", "ru" };
         for (int i = 0; i < 10; i++) {
-            if (ImGui::RadioButton(regions[i], G.save.settings.region == regions[i])) {
+            if (ledui::RadioButton(regions[i], G.save.settings.region == regions[i])) {
                 G.save.settings.region = regions[i];
                 G.pc.region = regions[i];
                 G.store.save(G.save);
             }
-            if (i % 5 != 4) ImGui::SameLine();
+            if (i % 5 != 4) ledui::SameLine();
         }
-        if (ImGui::Button("Save settings", ImVec2(200, 52))) G.store.save(G.save);
+        if (ledui::Button("Save settings", ledui::Vec2(200, 52))) G.store.save(G.save);
         break;
     }
     case 6: { // Cosmetics — try on (see yourself in the mirror!)
-        ImGui::Text("Body color:");
+        ledui::Text("Body color:");
         for (int c = 0; c < kBodyColorCount; c++) {
-            ImGui::PushStyleColor(ImGuiCol_Button,
-                ImVec4(kBodyColors[c].x, kBodyColors[c].y, kBodyColors[c].z, 1));
+            ledui::PushStyleColor(ledui::Col_Button,
+                ledui::Vec4(kBodyColors[c].x, kBodyColors[c].y, kBodyColors[c].z, 1));
             char id[16];
             snprintf(id, sizeof(id), "  ##b%d", c);
-            if (ImGui::Button(id, ImVec2(64, 44))) {
+            if (ledui::Button(id, ledui::Vec2(64, 44))) {
                 G.save.settings.bodyColor = c;
                 G.store.save(G.save);
             }
-            ImGui::PopStyleColor();
-            ImGui::SameLine();
+            ledui::PopStyleColor();
+            ledui::SameLine();
         }
-        ImGui::NewLine();
-        ImGui::Text("Hats:");
+        ledui::NewLine();
+        ledui::Text("Hats:");
         for (int i = 0; i < kCosmeticCount; i++) {
             char id[40];
             snprintf(id, sizeof(id), "%s##hat%d", kCosmetics[i].name, i);
-            if (ImGui::Button(id, ImVec2(140, 48))) {
+            if (ledui::Button(id, ledui::Vec2(140, 48))) {
                 G.save.settings.hat = kCosmetics[i].hatId;
                 G.store.save(G.save);
                 if (G.pc.status == PH_InRoom)
                     G.pc.setPlayerProps({ { "hat", PV::Int_(G.save.settings.hat) },
                                           { "c", PV::Int_(G.save.settings.bodyColor) } });
             }
-            if (i % 3 != 2) ImGui::SameLine();
+            if (i % 3 != 2) ledui::SameLine();
         }
-        ImGui::TextWrapped("Walk up to the mirror wall in the hub to try cosmetics on yourself!");
+        ledui::TextWrapped("Walk up to the mirror wall in the hub to try cosmetics on yourself!");
         break;
     }
     case 7: { // Account — PlayFab (Title 1762FA) sign-in, cloud save, leaderboard
         PfSnapshot ps = pf().snapshot();
-        ImGui::Text("PlayFab Title %s  —  %s", PlayFabClient::TITLE_ID(),
+        ledui::Text("PlayFab Title %s  —  %s", PlayFabClient::TITLE_ID(),
                     ps.loggedIn ? "signed in" : (ps.busy ? ps.status.c_str() : "not signed in"));
         if (ps.loggedIn) {
-            ImGui::Text("PlayFab ID: %s%s", ps.playFabId.c_str(),
+            ledui::Text("PlayFab ID: %s%s", ps.playFabId.c_str(),
                         ps.newlyCreated ? "  (new account)" : "");
-            ImGui::Text("Display name: %s", ps.displayName.empty() ? "(none)" : ps.displayName.c_str());
-            ImGui::Text("Device ID: %s", ps.customId.c_str());
-            ImGui::Text("Photon token: %s", ps.photonToken.empty() ? "(none yet)"
+            ledui::Text("Display name: %s", ps.displayName.empty() ? "(none)" : ps.displayName.c_str());
+            ledui::Text("Device ID: %s", ps.customId.c_str());
+            ledui::Text("Photon token: %s", ps.photonToken.empty() ? "(none yet)"
                                        : (G.pfAuthApplied ? "active" : "received"));
         }
-        if (!ps.status.empty()) ImGui::Text("Status: %s", ps.status.c_str());
-        if (!ps.lastError.empty()) ImGui::TextColored(ImVec4(1, 0.55f, 0.55f, 1), "Error: %s", ps.lastError.c_str());
-        ImGui::Separator();
+        if (!ps.status.empty()) ledui::Text("Status: %s", ps.status.c_str());
+        if (!ps.lastError.empty()) ledui::TextColored(ledui::Vec4(1, 0.55f, 0.55f, 1), "Error: %s", ps.lastError.c_str());
+        ledui::Separator();
 
-        if (ImGui::Button(ps.loggedIn ? "Re-sign in / refresh" : "Sign in (device)", ImVec2(300, 56)))
+        if (ledui::Button(ps.loggedIn ? "Re-sign in / refresh" : "Sign in (device)", ledui::Vec2(300, 56)))
             pf().requestLogin();
-        ImGui::SameLine();
-        if (ImGui::Button("Title news", ImVec2(200, 56)))
+        ledui::SameLine();
+        if (ledui::Button("Title news", ledui::Vec2(200, 56)))
             pf().requestNews();
 
-        ImGui::Separator();
-        ImGui::TextWrapped("Cloud save (PlayFab UserData, key ledgevr_save):");
-        if (ImGui::Button("Upload local save", ImVec2(300, 56)))
+        ledui::Separator();
+        ledui::TextWrapped("Cloud save (PlayFab UserData, key ledgevr_save):");
+        if (ledui::Button("Upload local save", ledui::Vec2(300, 56)))
             pf().requestCloudSave(G.save.toJson());
-        ImGui::SameLine();
-        if (ImGui::Button("Download", ImVec2(180, 56)))
+        ledui::SameLine();
+        if (ledui::Button("Download", ledui::Vec2(180, 56)))
             pf().requestCloudLoad();
-        ImGui::SameLine();
-        if (ImGui::Button("Apply to device", ImVec2(240, 56))) {
+        ledui::SameLine();
+        if (ledui::Button("Apply to device", ledui::Vec2(240, 56))) {
             SaveData d;
             if (cloudUnpackSave(ps.cloudSave.empty() ? "{}" : ps.cloudSave, d)) {
                 G.save = d;
@@ -495,37 +495,37 @@ static void drawMenu() {
                 pushStatus("cloud save parse failed");
             }
         }
-        ImGui::Separator();
+        ledui::Separator();
 
-        ImGui::Text("Leaderboard (Goals completed):");
-        if (ImGui::Button("Upload my goals stat", ImVec2(320, 56)))
+        ledui::Text("Leaderboard (Goals completed):");
+        if (ledui::Button("Upload my goals stat", ledui::Vec2(320, 56)))
             pf().requestUpdateStat("Goals", G.save.goalsCompleted);
-        ImGui::SameLine();
-        if (ImGui::Button("Top 10", ImVec2(160, 56)))
+        ledui::SameLine();
+        if (ledui::Button("Top 10", ledui::Vec2(160, 56)))
             pf().requestLeaderboard("Goals", 10);
         if (!ps.leaderboard.empty()) {
             for (size_t i = 0; i < ps.leaderboard.size(); i++)
-                ImGui::BulletText("%d. %s — %d", (int)(i + 1),
+                ledui::BulletText("%d. %s — %d", (int)(i + 1),
                                   ps.leaderboard[i].name.c_str(), ps.leaderboard[i].value);
         }
-        ImGui::Separator();
+        ledui::Separator();
 
-        if (ImGui::Button("Re-fetch Photon token", ImVec2(360, 56)))
+        if (ledui::Button("Re-fetch Photon token", ledui::Vec2(360, 56)))
             pf().requestPhotonToken("15f80a97-41e4-4c8b-a887-9b8de6d103ad");
-        ImGui::TextWrapped("The token authenticates this device to Photon via PlayFab "
+        ledui::TextWrapped("The token authenticates this device to Photon via PlayFab "
                            "custom auth automatically once received.");
         if (!ps.news.empty()) {
-            ImGui::Separator();
-            ImGui::Text("Title news:");
+            ledui::Separator();
+            ledui::Text("Title news:");
             for (auto& n : ps.news) {
-                ImGui::BulletText("%s", n.title.c_str());
-                ImGui::TextWrapped("  %s", n.body.c_str());
+                ledui::BulletText("%s", n.title.c_str());
+                ledui::TextWrapped("  %s", n.body.c_str());
             }
         }
         break;
     }
     }
-    ImGui::End();
+    ledui::End();
 }
 
 // ---------------------------------------------------------------------------
@@ -549,7 +549,7 @@ static void photonInit() {
         av.actorNr = a;
         av.name = nick;
         av.pos = vec3(2, 1, 2);
-        av.lastSeen = ImGui::GetTime();
+        av.lastSeen = ledui::GetTime();
         av.color = vec4(0.7f, 0.8f, 0.9f, 1);
         G.avatars.push_back(av);
     };
@@ -572,7 +572,7 @@ static void photonInit() {
                 if (av.actorNr == actor) {
                     av.pos = pos;
                     av.yaw = yaw;
-                    av.lastSeen = ImGui::GetTime();
+                    av.lastSeen = ledui::GetTime();
                     break;
                 }
         }
@@ -658,9 +658,9 @@ static void renderAvatar(const Avatar& av) {
     G.R.drawMesh(gSphereMesh, bodyT * mat4::translate(vec3(0, 1.15f, 0)) * mat4::scale(vec3(0.56f)), c);
     if (av.hat > 0 && av.hat < 6) {
         // 1.1: hats bob; crowns spin; horns lean with the head
-        float bob = sinf((float)ImGui::GetTime() * 2.2f + av.actorNr * 1.7f) * 0.018f;
+        float bob = sinf((float)ledui::GetTime() * 2.2f + av.actorNr * 1.7f) * 0.018f;
         mat4 hatT = bodyT * mat4::translate(vec3(0, 1.38f + bob + ep.hatLift, 0))
-                  * (av.hat == 5 ? mat4::rotY((float)ImGui::GetTime() * 1.6f) : mat4());
+                  * (av.hat == 5 ? mat4::rotY((float)ledui::GetTime() * 1.6f) : mat4());
         if (av.hat == 3) {   // horns: two cones offset at render
             G.R.drawMesh(gHatMeshes[3], hatT * mat4::translate(vec3(-0.14f, 0.1f, 0)), vec4(1, 1, 1, 1));
             G.R.drawMesh(gHatMeshes[3], hatT * mat4::translate(vec3(0.14f, 0.1f, 0)), vec4(1, 1, 1, 1));
@@ -945,10 +945,10 @@ int mainLoop(android_app* app) {
 
     // ---- UI quad ----
     if (G.menuOpen && xr.uiAcquire()) {
-        ImGui_ImplNewFrame();
-        ImGui::NewFrame();
+        uiNewFrame();
+        ledui::NewFrame();
         drawMenu();
-        uiRenderFrame(ImVec2((float)gUiW, (float)gUiH));
+        uiRenderFrame(ledui::Vec2((float)gUiW, (float)gUiH));
         xr.uiRelease();
         // menu quad: anchored in front of the left controller aim, world-locked
         // 1.1: slide-up + scale tween on open
@@ -969,9 +969,9 @@ int mainLoop(android_app* app) {
 }
 
 // ImGui per-frame bookkeeping (single-frame reuse: NewFrame/EndFrame paired)
-static void ImGui_ImplNewFrame() {
-    ImGuiIO& io = ImGui::GetIO();
-    io.DisplaySize = ImVec2((float)gUiW, (float)gUiH);
+static void uiNewFrame() {
+    ledui::IO& io = ledui::GetIO();
+    io.DisplaySize = ledui::Vec2((float)gUiW, (float)gUiH);
 }
 
 // ---------------------------------------------------------------------------

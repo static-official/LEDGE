@@ -10,7 +10,7 @@ import os, itertools, uuid, sys
 BASE = "/home/z/my-project"
 IOS = f"{BASE}/ledgevr-ios"
 NATIVE = f"{BASE}/ledgevr/native"
-IMGUI = f"{BASE}/ledgevr/vendor/imgui"
+
 PROJ_DIR = f"{IOS}/LEDGEVR.xcodeproj"
 
 _seq = itertools.count(1)
@@ -35,12 +35,9 @@ SRC_FILES = [
     f"{NATIVE}/playfab.cpp",
     f"{NATIVE}/save.cpp",
     f"{NATIVE}/textures.cpp",
+    f"{NATIVE}/ledui/ledui.cpp",
     f"{IOS}/shim/jnihost_impl.cpp",
     f"{IOS}/shim/asset_impl.cpp",
-    f"{IMGUI}/imgui.cpp",
-    f"{IMGUI}/imgui_draw.cpp",
-    f"{IMGUI}/imgui_tables.cpp",
-    f"{IMGUI}/imgui_widgets.cpp",
 ]
 HDR_FILES = [
     f"{IOS}/native_ios/ios_backend.h", f"{IOS}/native_ios/ios_host.h",
@@ -49,15 +46,11 @@ HDR_FILES = [
     f"{NATIVE}/mathlib.h", f"{NATIVE}/world.h", f"{NATIVE}/renderer.h",
     f"{NATIVE}/photon.h", f"{NATIVE}/playfab.h", f"{NATIVE}/save.h",
     f"{NATIVE}/anim.h", f"{NATIVE}/textures.h", f"{NATIVE}/assets.h",
-    f"{NATIVE}/log.h",
-    f"{IMGUI}/imgui.h", f"{IMGUI}/imconfig.h", f"{IMGUI}/imgui_internal.h",
+    f"{NATIVE}/log.h", f"{NATIVE}/ledui/ledui.h",
 ]
 for f in SRC_FILES + HDR_FILES:
     if not os.path.exists(f):
         print("MISSING:", f); sys.exit(1)
-IMG_INTERNAL = f"{IMGUI}/imgui_internal.h"
-if not os.path.exists(IMG_INTERNAL):
-    HDR_FILES = [f for f in HDR_FILES if f != IMG_INTERNAL]
 
 FRAMEWORKS = ["UIKit", "Foundation", "OpenGLES", "QuartzCore",
               "AVFoundation", "CoreGraphics", "GLKit"]
