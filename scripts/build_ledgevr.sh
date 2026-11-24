@@ -46,7 +46,7 @@ java -cp $TC/r8.jar com.android.tools.r8.R8 --release --min-api 26 --lib $AJ \
 echo "== resources =="
 $BT/aapt2 compile --dir $PROJ/app/res -o $OUT/res.zip
 $BT/aapt2 link -I $AJ --manifest $PROJ/app/AndroidManifest.xml -R $OUT/res.zip \
-  --min-sdk-version 26 --target-sdk-version 32 --version-code 2 --version-name 1.1 \
+  --min-sdk-version 26 --target-sdk-version 32 --version-code 3 --version-name 1.2 \
   -o $OUT/base.apk --auto-add-overlay
 
 cp -f $PROJ/libs/arm64-v8a/libopenxr_loader.so $OUT/libs/arm64-v8a/
@@ -54,7 +54,7 @@ echo "== package =="
 cd $OUT && rm -rf $OUT/assets && cp -r $PROJ/app/assets assets 2>/dev/null || mkdir -p assets
 $BT/aapt2 link -I $AJ --manifest $PROJ/app/AndroidManifest.xml -R $OUT/res.zip \
   -A $OUT/assets --min-sdk-version 26 --target-sdk-version 32 \
-  --version-code 2 --version-name 1.1 -o $OUT/base.apk --auto-add-overlay
+  --version-code 3 --version-name 1.2 -o $OUT/base.apk --auto-add-overlay
 zip -qj $OUT/base.apk $OUT/dex/classes.dex
 # native libs MUST live under lib/<abi>/ inside the APK (Android ignores libs/)
 mkdir -p $OUT/lib/arm64-v8a
@@ -67,6 +67,6 @@ echo "== sign =="
   -dname "CN=MoonyDev, O=MoonyDev" >/dev/null 2>&1
 $BT/zipalign -f -p 4 $OUT/base.apk $OUT/aligned.apk
 $BT/apksigner sign --v4-signing-enabled false --ks $PROJ/ledgevr.keystore --ks-pass pass:ledgevr123 \
-  --out /home/z/my-project/download/LEDGEVR_v1.1_arm64.apk $OUT/aligned.apk
-$BT/apksigner verify --print-certs /home/z/my-project/download/LEDGEVR_v1.1_arm64.apk
+  --out /home/z/my-project/download/LEDGEVR_v1.2_arm64.apk $OUT/aligned.apk
+$BT/apksigner verify --print-certs /home/z/my-project/download/LEDGEVR_v1.2_arm64.apk
 echo "BUILD OK"

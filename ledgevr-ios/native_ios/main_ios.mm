@@ -895,19 +895,21 @@ static bool mainLoop(bool surfaceReady) {
     IosBackend& tb = G.tb;
     pfApplyAuth();
 
-    // EAGL surface is attached by the view controller before frames start
-    if (!tb.ok()) {
-        if (!surfaceReady) return false;
-        if (!G.gfxReady) {
-            if (!G.R.init()) { LOGE("renderer init failed"); return false; }
-            uiInit();
-            buildGeo();
-            // 1.1: material pack from bundle resources
-            G.tex.setBundleDir(G.bundleDir);
-            G.tex.init(nullptr);
-            G.tex.loadAll();
-            G.gfxReady = true;
-        }
+    // EAGL surface: normally attached before the first frame (resize fires
+    // from viewDidLayoutSubviews, the display link starts after). Init gfx
+    // once the surface exists — whichever order the two arrive in — or the
+    // game sits on the pastel "loading" clear-color forever (no shaders,
+    // no fonts, loading never cleared).
+    if (!G.gfxReady) {
+        if (!tb.ok() && !surfaceReady) return false;   // wait for an EAGL surface
+        if (!G.R.init()) { LOGE("renderer init failed"); return false; }
+        uiInit();
+        buildGeo();
+        // 1.1: material pack from bundle resources
+        G.tex.setBundleDir(G.bundleDir);
+        G.tex.init(nullptr);
+        G.tex.loadAll();
+        G.gfxReady = true;
         G.loading = false;
     }
 
