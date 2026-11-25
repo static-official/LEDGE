@@ -823,21 +823,94 @@ static void handleInput() {
     }
 }
 
+// ---------------------------------------------------------------------------
+// staged startup: the render loop runs from the first frame and init advances
+// one step per frame — frames are ALWAYS submitted, and a failing step shows
+// a visible error (red screen) instead of hanging silently on the OS placeholder
+// ---------------------------------------------------------------------------
+static const char* kInitStages[] = { "renderer", "ui", "world", "materials" };
+static const int   kInitStageCount = (int)(sizeof(kInitStages) / sizeof(kInitStages[0]));
+static int         gInitStage = 0;    // next stage index
+static std::string gInitErr;          // first failure stops progression
+
+static void initStep(android_app* app) {
+    if (gInitStage >= kInitStageCount) return;
+    LOGI("init stage: %s", kInitStages[gInitStage]);
+    switch (gInitStage) {
+    case 0:
+        if (!G.R.init()) { gInitErr = "renderer init failed"; return; }
+        break;
+    case 1:
+        uiInit();
+        break;
+    case 2:
+        G.W.loadHub();
+        G.status = "ready";
+        break;
+    case 3:
+        G.tex.init(app->activity->assetManager);
+        G.tex.loadAll();
+        jni().musicPlay(0);   // Candy Skies while you settle in
+        break;
+    }
+    gInitStage++;
+}
+
 int mainLoop(android_app* app) {
     // ---- world + input each frame ----
     XrBackend& xr = G.xr;
     pfApplyAuth();   // wire PlayFab photon token once it arrives
-    if (xr.session == XR_NULL_HANDLE || !xr.sessionRunning) {
-        // session creation is per-frame until it succeeds (createSession is a
-        // no-op once the session exists); pumpEvents then handles READY→begin
-        if (xr.session == XR_NULL_HANDLE) xr.createSession();
-        xr.pumpEvents();
+    // session creation is per-frame until it succeeds (createSession is a
+    // no-op once the session exists); pumpEvents then handles READY→begin
+    if (xr.session == XR_NULL_HANDLE) xr.createSession();
+    xr.pumpEvents();
+    if (xr.session == XR_NULL_HANDLE || !xr.sessionRunning)
         return xr.shouldExit ? 1 : 0;
-    }
 
     xr.beginFrame();
     if (!xr.sessionRunning) return xr.shouldExit ? 1 : 0;
     xr.syncInput();
+
+    // advance startup one step per frame while frames keep submitting
+    initStep(app);
+    if (gInitStage < kInitStageCount || !gInitErr.empty()) {
+        // loading (pastel) or init-error (red) screen on both eyes
+        for (int e = 0; e < 2; e++) {
+            if (!xr.eyeAcquire(e)) continue;
+            float zn = 0.05f, zf = 300.0f;
+            float l = tanf(xr.views[e].fov.angleLeft) * zn, r = tanf(xr.views[e].fov.angleRight) * zn;
+            float t = tanf(xr.views[e].fov.angleUp) * zn, bt = tanf(xr.views[e].fov.angleDown) * zn;
+            mat4 proj = mat4::identity();
+            proj.m[0] = 2 * zn / (r - l); proj.m[5] = 2 * zn / (t - bt);
+            proj.m[8] = (r + l) / (r - l); proj.m[9] = (t + bt) / (t - bt);
+            proj.m[10] = -(zf + zn) / (zf - zn); proj.m[11] = -1;
+            proj.m[14] = -2 * zf * zn / (zf - zn); proj.m[15] = 0;
+            quat q(xr.views[e].pose.orientation.x, xr.views[e].pose.orientation.y,
+                   xr.views[e].pose.orientation.z, xr.views[e].pose.orientation.w);
+            vec3 tp(xr.views[e].pose.position.x, xr.views[e].pose.position.y, xr.views[e].pose.position.z);
+            mat4 view = mat4::fromQuat(q.conj());
+            vec3 rc = q.conj().rotate(tp);
+            view.m[12] = -rc.x; view.m[13] = -rc.y; view.m[14] = -rc.z;
+            if (gInitErr.empty()) glClearColor(0.72f, 0.89f, 0.93f, 1);   // pastel: progressing
+            else                  glClearColor(0.82f, 0.25f, 0.25f, 1);   // red: init failed
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            G.R.wtext.begin();
+            G.R.wtext.addText("LEDGE VR", vec3(0, 0.4f, -2.0f), 0.35f, vec4(0.2f, 0.3f, 0.4f, 1), true);
+            if (!gInitErr.empty()) {
+                G.R.wtext.addText(gInitErr.c_str(), vec3(0, -0.2f, -2.0f), 0.16f,
+                                  vec4(1, 0.9f, 0.9f, 1), true);
+            } else {
+                char buf[96];
+                snprintf(buf, sizeof(buf), "loading: %s…", kInitStages[gInitStage]);
+                G.R.wtext.addText(buf, vec3(0, -0.2f, -2.0f), 0.18f, vec4(0.3f, 0.4f, 0.5f, 1), true);
+            }
+            G.R.wtext.render(proj.m, view.m);
+            xr.eyeRelease(e);
+        }
+        xr.endFrame();
+        return xr.shouldExit ? 1 : 0;
+    }
+    G.loading = false;   // startup complete — gameplay takes over
 
     G.worldClock += 1.0f / 72.0f;
 
@@ -930,19 +1003,11 @@ int mainLoop(android_app* app) {
         G.R.setViewProjEye(proj.m, view.m, e);
         G.R.wtext.begin();
 
-        if (G.loading) {
-            glClearColor(0.72f, 0.89f, 0.93f, 1);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            G.R.wtext.addText("LEDGE VR", vec3(0, 0.4f, -2.0f), 0.35f, vec4(0.2f, 0.3f, 0.4f, 1), true);
-            G.R.wtext.addText("loading…", vec3(0, -0.2f, -2.0f), 0.18f, vec4(0.3f, 0.4f, 0.5f, 1), true);
-            G.R.wtext.render(proj.m, view.m);
-        } else {
-            glClearColor(0.0f, 0.0f, 0.0f, 1);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            renderWorld();
-            rendererFlushLines(G.R);
-            G.R.wtext.render(proj.m, view.m);
-        }
+        glClearColor(0.0f, 0.0f, 0.0f, 1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        renderWorld();
+        rendererFlushLines(G.R);
+        G.R.wtext.render(proj.m, view.m);
         xr.eyeRelease(e);
     }
 
@@ -996,25 +1061,15 @@ void android_main(android_app* app) {
     // PlayFab (Title 1762FA): device sign-in + news + Photon auth token, in background
     pf().init(G.dataDir);
     pf().requestLogin();
+    photonInit();   // pure callback wiring — no GL, no blocking network
 
     if (!G.xr.init(app->activity->vm, app->activity->clazz, "LEDGE VR")) {
-        LOGE("OpenXR init failed");
+        LOGE("OpenXR init failed");   // no session → nothing renderable at all
         return;
     }
-    if (!G.R.init()) { LOGE("renderer init failed"); return; }
-    uiInit();
-    photonInit();
-    G.W.loadHub();
-    G.status = "ready";
-
-    // 1.1: material pack + background music
-    G.tex.init(app->activity->assetManager);
-    G.tex.loadAll();
-    jni().musicPlay(0);   // Candy Skies while you settle in
-
-    // init is synchronous and done — clear the in-VR loading screen
-    // (the mobile shell does the same in its first-frame init block)
-    G.loading = false;
+    // renderer / ui / world / materials init now runs one step per frame inside
+    // mainLoop (staged startup), so frames submit while it happens and failures
+    // show a visible error screen instead of hanging on the OS placeholder
 
     // poll lifecycle events + pump render loop
     while (true) {

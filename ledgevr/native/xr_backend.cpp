@@ -68,7 +68,8 @@ static bool glInit(XrBackend* B) {
     if (!eglInitialize(B->eglDisplay, nullptr, nullptr)) return false;
 
     const EGLint cfgAttrs[] = {
-        EGL_SURFACE_TYPE, EGL_DONT_CARE,
+        EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,   // pbuffer-capable config: works even
+                                             // without EGL_KHR_surfaceless_context
         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
         EGL_NONE };
     EGLConfig cfg = nullptr;
@@ -80,8 +81,17 @@ static bool glInit(XrBackend* B) {
     B->eglContext = eglCreateContext(B->eglDisplay, cfg, EGL_NO_CONTEXT, ctxAttrs);
     if (B->eglContext == EGL_NO_CONTEXT) return false;
 
-    // surfaceless context (Quest supports EGL_KHR_surfaceless_context)
-    eglMakeCurrent(B->eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, B->eglContext);
+    // 4x4 pbuffer as the draw surface — guaranteed current on every ES3 device
+    // (the unchecked surfaceless makeCurrent before this could silently leave
+    //  NO context current, failing every GL call made afterwards)
+    const EGLint pbAttrs[] = { EGL_WIDTH, 4, EGL_HEIGHT, 4, EGL_NONE };
+    B->eglSurface = eglCreatePbufferSurface(B->eglDisplay, cfg, pbAttrs);
+    if (!eglMakeCurrent(B->eglDisplay, B->eglSurface, B->eglSurface, B->eglContext)) {
+        LOGE("eglMakeCurrent failed (pbuffer)");
+        return false;
+    }
+    LOGI("EGL %s | GL %s", eglQueryString(B->eglDisplay, EGL_VERSION),
+         (const char*)glGetString(GL_VERSION));
     return true;
 }
 

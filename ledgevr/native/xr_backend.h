@@ -42,6 +42,7 @@ struct XrBackend {
     EGLDisplay eglDisplay = EGL_NO_DISPLAY;
     EGLConfig  eglConfig = nullptr;
     EGLContext eglContext = EGL_NO_CONTEXT;
+    EGLSurface eglSurface = EGL_NO_SURFACE;   // 4x4 pbuffer backing the context
 
     // OpenXR
     XrInstance instance = XR_NULL_HANDLE;
