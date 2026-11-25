@@ -7,7 +7,7 @@ BASE=/home/z/my-project
 API=https://api.github.com
 AUTH="Authorization: token $GH_TOKEN"
 TAG=v1.6
-PAYLOAD=$BASE/scripts/release_v15.json
+PAYLOAD=$BASE/scripts/release_v16.json
 
 python3 - "$PAYLOAD" <<'PYEOF'
 import json, sys
