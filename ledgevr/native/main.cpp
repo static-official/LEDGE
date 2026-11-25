@@ -828,6 +828,9 @@ int mainLoop(android_app* app) {
     XrBackend& xr = G.xr;
     pfApplyAuth();   // wire PlayFab photon token once it arrives
     if (xr.session == XR_NULL_HANDLE || !xr.sessionRunning) {
+        // session creation is per-frame until it succeeds (createSession is a
+        // no-op once the session exists); pumpEvents then handles READY→begin
+        if (xr.session == XR_NULL_HANDLE) xr.createSession();
         xr.pumpEvents();
         return xr.shouldExit ? 1 : 0;
     }
@@ -1008,6 +1011,10 @@ void android_main(android_app* app) {
     G.tex.init(app->activity->assetManager);
     G.tex.loadAll();
     jni().musicPlay(0);   // Candy Skies while you settle in
+
+    // init is synchronous and done — clear the in-VR loading screen
+    // (the mobile shell does the same in its first-frame init block)
+    G.loading = false;
 
     // poll lifecycle events + pump render loop
     while (true) {
