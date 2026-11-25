@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="moonydev.ledgevr"
-    android:versionCode="4"
-    android:versionName="1.3">
+    android:versionCode="5"
+    android:versionName="1.4">
 
     <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="32" />
 
@@ -23,6 +23,11 @@
         android:extractNativeLibs="true"
         android:allowBackup="true">
 
+        <!-- Horizon OS: treat this app as a Quest VR app (immersive launch),
+             not as a flat 2D Android panel. -->
+        <meta-data android:name="com.oculus.vr.focusaware" android:value="true" />
+        <meta-data android:name="com.samsung.android.vr.application.required" android:value="true" />
+
         <activity
             android:name="com.moonydev.ledgevr.MainActivity"
             android:exported="true"
@@ -33,7 +38,8 @@
             <meta-data android:name="android.app.lib_name" android:value="v40shell" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.INFO" />
+                <category android:name="com.oculus.intent.category.VR" />
             </intent-filter>
         </activity>
     </application>
